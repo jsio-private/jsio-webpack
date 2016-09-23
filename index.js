@@ -9,6 +9,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 
 const generateCommonConfig = (conf, options) => {
+  // BASE CONFIG
   conf.merge((current) => {
     current.resolve = current.resolve || {};
     current.resolve.extensions = [
@@ -27,6 +28,14 @@ const generateCommonConfig = (conf, options) => {
     return current;
   });
 
+  // PRELOADERS
+  conf.preLoader('eslint', {
+    test: /\.js$/,
+    exclude: /(node_modules)/
+  });
+  // conf.preLoader('tslint', {})
+
+  // LOADERS
   conf.loader('json', { test: /\.json$/ });
   conf.loader('worker', {
     test: /\.worker\.js$/,
@@ -52,12 +61,18 @@ const generateCommonConfig = (conf, options) => {
     test: /\.(glsl|vert|frag)$/,
     loader: 'glsl-template-loader'
   })
+  conf.loader('woff', {
+    test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+    loader: 'url-loader?limit=10000&mimetype=application/font-woff'
+  })
 
+  // PLUGINS
   conf.plugin('webpackDefine', webpack.DefinePlugin, [{
     'process.env.NODE_ENV': JSON.stringify(NODE_ENV)
   }]);
 
-  if (NODE_ENV === 'production') {
+
+  if (NODE_ENV === 'production' && !options.noStylusExtractText) {
     // Use ExtractTextPlugin for production
     const stylusLoader = ExtractTextPlugin.extract(
       'style-loader',
