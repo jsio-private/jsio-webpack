@@ -1,14 +1,12 @@
-'use strict';
 const path = require('path');
 const nib = require('nib');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+const config = require('../config');
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
 
-
-const generateCommonConfig = (conf, options) => {
+module.exports = (conf, options) => {
   // BASE CONFIG
   conf.merge((current) => {
     current.resolve = current.resolve || {};
@@ -18,7 +16,7 @@ const generateCommonConfig = (conf, options) => {
     current.resolveLoader = current.resolveLoader || {};
     current.resolveLoader.root = [
       path.resolve(process.env.PWD, 'node_modules'), // Project node_modules
-      path.resolve(__dirname, 'node_modules') // jsio-webpack node_modules
+      path.resolve(__dirname, '..', '..', 'node_modules') // jsio-webpack node_modules
     ];
     current.stylus = {
       use: [nib()],
@@ -68,11 +66,11 @@ const generateCommonConfig = (conf, options) => {
 
   // PLUGINS
   conf.plugin('webpackDefine', webpack.DefinePlugin, [{
-    'process.env.NODE_ENV': JSON.stringify(NODE_ENV)
+    'process.env.NODE_ENV': JSON.stringify(config.env)
   }]);
 
 
-  if (NODE_ENV === 'production' && !options.noStylusExtractText) {
+  if (config.env === 'production' && !options.noStylusExtractText) {
     // Use ExtractTextPlugin for production
     const stylusLoader = ExtractTextPlugin.extract(
       'style-loader',
@@ -92,10 +90,4 @@ const generateCommonConfig = (conf, options) => {
   }
 
   return conf;
-};
-
-
-
-module.exports = {
-  generateCommonConfig: generateCommonConfig
 };
