@@ -5,10 +5,12 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
-const yargs = require('yargs');
 const webpack = require('webpack');
 const webpackMultiConfigurator = require('webpack-multi-configurator');
+const WebpackDevServer = require('webpack-dev-server');
+const yargs = require('yargs');
 const chalk = require('chalk');
+const _ = require('lodash');
 
 const jsioWebpack = require('./index');
 
@@ -26,6 +28,11 @@ let arg = yargs
     description: 'Watch files, compile on change',
     type: 'boolean',
     default: false
+  }).option('s', {
+    alias: 'serve',
+    description: 'Watch files, compile on change, serve from memory using webpack-dev-server',
+    type: 'boolean',
+    default: false
   })
   .help('h');
 let mainArgv = arg.argv;
@@ -41,6 +48,9 @@ if (fs.existsSync(userWebpackPath)) {
 }
 
 
+const DEFAULT_DEVTOOL = 'eval-source-map';
+
+
 const DEFAULT_OPTIONS = {};
 const multiConf = webpackMultiConfigurator(DEFAULT_OPTIONS);
 
@@ -53,10 +63,37 @@ prodConf.append((conf) => {
 });
 
 
+const serveConf = multiConf.define('serve');
+serveConf.append((conf) => {
+  _.forEach(conf.entry, (v, k) => {
+    // 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:8080'
+    conf.entry[k] = [
+      'webpack/hot/only-dev-server',
+      'webpack-dev-server/client?http://localhost:8080/',
+      v
+    ];
+  });
+  // Add HMR plugin
+  conf.plugin('webpackHMR', webpack.HotModuleReplacementPlugin);
+  // Add sourcemap rules and devServer configs
+  conf.merge({
+    devtool: DEFAULT_DEVTOOL,
+    devServer: {
+      inline: true,
+      hot: true
+    },
+    output: {
+      pathinfo: true
+    }
+  });
+  return conf;
+});
+
+
 const watchConf = multiConf.define('watch');
 watchConf.append((conf) => {
   conf.merge({
-    devtool: 'eval-source-map',
+    devtool: DEFAULT_DEVTOOL,
     watch: true,
     output: {
       pathinfo: true
@@ -71,6 +108,11 @@ commonConf.append(jsioWebpack.generateCommonConfig);
 // 'common' gets 'production' automatically
 if (NODE_ENV === 'production') {
   commonConf.append('production');
+}
+if (mainArgv.serve) {
+  commonConf.append('serve');
+} else if (mainArgv.watch) {
+  commonConf.append('watch');
 }
 
 
@@ -106,12 +148,6 @@ const finalWebpackConfig = multiConf.resolve();
 console.log('Config ready:');
 console.log(util.inspect(finalWebpackConfig, { colors: true, depth: 4 }));
 
-// What if we want to watch?!
-// webpack --progress --watch
-
-
-console.log('\nBuilding...\n');
-const compiler = webpack(finalWebpackConfig);
 
 // LOGGING UTILS
 const handleFatalError = (err) => {
@@ -169,10 +205,43 @@ const onBuild = (err, stats) => {
 };
 //
 
-if (mainArgv.watch) {
+
+
+console.log('\nBuilding...\n');
+
+let compiler = webpack(finalWebpackConfig);
+
+if (mainArgv.serve) {
+  const server = new WebpackDevServer(compiler, {
+    // webpack-dev-server options
+    contentBase: process.env.PWD,
+    hot: true,
+    historyApiFallback: false,
+
+    // webpack-dev-middleware options
+    quiet: false,
+    noInfo: false,
+    lazy: false,
+    filename: 'bundle.js',
+    // watchOptions: {
+    //   aggregateTimeout: 300,
+    //   poll: 1000
+    // },
+    // It's a required option.
+    publicPath: '/',
+    stats: { colors: true }
+  });
+
+  console.log('Starting server');
+  server.listen(8080, 'localhost', function () {
+    console.log('> Server ready');
+  });
+} else if (mainArgv.watch) {
+  compiler = webpack(finalWebpackConfig);
   const watcher = compiler.watch({
     aggregateTimeout: 300 // wait so long for more changes
   }, onBuild);
 } else {
+  compiler = webpack(finalWebpackConfig);
   compiler.run(onBuild);
 }
