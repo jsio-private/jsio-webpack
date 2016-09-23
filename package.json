@@ -4,7 +4,7 @@
   "bin": {
     "jsio-webpack-build": "./build.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
     "babel-preset-es2015": "^6.14.0",
@@ -29,9 +29,7 @@
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.16.1",
     "webpack-multi-configurator": "^1.1.2",
-    "worker-loader": "^0.7.1"
-  },
-  "dependencies": {
+    "worker-loader": "^0.7.1",
     "lodash": "^4.16.1",
     "yargs": "^5.0.0"
   }
