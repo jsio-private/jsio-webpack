@@ -55,7 +55,7 @@ const configure = (configurator, options) => {
   });
 
   // Set options for the jsio-webpack config generators
-  options.noStylusExtractText = true;
+  options.useStylusExtractText = true;
 
   return configurator;
 };
@@ -75,9 +75,19 @@ module.exports = {
 
 ### Configure options
 
-```js
-/**
- * @typedef {object} options
- * @property {boolean} [noStylusExtractText] - Use the normal style loader for both development and production builds.
- */
-```
+A brief explanation of the options available:
+
+
+#### `useStylusExtractText`
+
+This only effects production builds.  The ExtractTextPlugin is used to move all stylus code in to a separate built file, to be included in your pages `<head>`.
+
+
+#### `useVendorChunk`
+
+This will cause all imported files from `node_modules` to be included in a separate `vendor` chunk.
+
+
+#### `useBase64FontLoader`
+
+Uses [base64-font-loader](https://www.npmjs.com/package/base64-font-loader) to inline fonts.

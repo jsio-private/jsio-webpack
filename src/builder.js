@@ -79,7 +79,6 @@ const start = () => {
   const userConfigs = getUserConfigs(process.env.PWD);
   const multiConf = newMultiConf();
 
-
   const userDefinitions = buildUserDefinitions(multiConf, userConfigs);
 
   multiConf.otherwise(_.map(userDefinitions, o => o.name).join('+'));
@@ -114,7 +113,7 @@ const start = () => {
     });
 
     console.log('Starting server');
-    server.listen(8080, 'localhost', function () {
+    server.listen(8080, 'localhost', () => {
       console.log('> Server ready');
     });
   } else if (config.watch) {

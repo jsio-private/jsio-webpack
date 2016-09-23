@@ -12,16 +12,18 @@ const handleSoftErrors = (errors) => {
     let s = chalk.red(err.message);
     if (err.details) {
       s += '\n' + chalk.yellow(err.details);
+    } else if (err.stack) {
+      s += '\n' + chalk.yellow(err.stack);
     }
     s += '\n';
     console.error(s);
   });
 };
 
-// const handleWarnings = (warnings) => {
-//   console.warn('Warnings:');
-//   warnings.forEach(warning => console.warn(warning.message));
-// };
+const handleWarnings = (warnings) => {
+  console.warn('Warnings:');
+  warnings.forEach(warning => console.warn(warning.message));
+};
 
 const successfullyCompiled = (stats) => {
   console.log('Stats:');
@@ -42,9 +44,9 @@ const pprintStats = (stats) => {
   }
   // NOTE: Warnings are handled by stats.toString()
   // If we stop using that, add this back
-  // if (stats.hasWarnings()) {
-  //   handleWarnings(compilation.warnings);
-  // }
+  if (stats.hasWarnings()) {
+    handleWarnings(compilation.warnings);
+  }
   successfullyCompiled(stats);
 };
 
