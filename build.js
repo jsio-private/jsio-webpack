@@ -3,6 +3,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+
 const webpack = require('webpack');
 const webpackMultiConfigurator = require('webpack-multi-configurator');
 
@@ -34,6 +36,7 @@ multiConf.define('production')
 
 const common = multiConf.define('common')
   .append(jsioWebpack.generateCommonConfig);
+// 'common' gets 'production' automatically
 if (NODE_ENV === 'production') {
   common.append('production');
 }
@@ -46,12 +49,14 @@ multiConf.define('app')
 
 
 function appGenerator (factory, options) {
-  const conf = userWebpackConfig(factory(), options);
-  conf.merge({
-    resolve: {
-      root: [path.resolve(pwd, 'node_modules')]
-    }
-  });
+  const userConfigurator = factory();
+  let userConfiguratorFn;
+  if (typeof userWebpackConfig === 'object') {
+    userConfiguratorFn = userWebpackConfig.configure;
+  } else {
+    userConfiguratorFn = userWebpackConfig;
+  }
+  const conf = userConfiguratorFn(userConfigurator, options);
   return conf;
 };
 
@@ -59,7 +64,8 @@ function appGenerator (factory, options) {
 multiConf.otherwise('app');
 
 const finalWebpackConfig = multiConf.resolve();
-console.log('Final config:', finalWebpackConfig);
+console.log('Config ready:');
+console.log(util.inspect(finalWebpackConfig, { colors: true, depth: 4 }));
 
 console.log('\nBuilding...\n');
 const compiler = webpack(finalWebpackConfig);

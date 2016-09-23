@@ -14,7 +14,11 @@ const generateCommonConfig = (conf, options) => {
     current.resolve.extensions = [
       '', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.vert', '.frag', '.glsl'
     ];
-    current.resolve.root = [path.resolve(__dirname, 'node_modules')];
+    current.resolveLoader = current.resolveLoader || {};
+    current.resolveLoader.root = [
+      path.resolve(process.env.PWD, 'node_modules'), // Project node_modules
+      path.resolve(__dirname, 'node_modules') // jsio-webpack node_modules
+    ];
     current.stylus = {
       use: [nib()],
       import: ['~nib/lib/nib/index.styl'],
