@@ -46,7 +46,13 @@ multiConf.define('app')
 
 
 function appGenerator (factory, options) {
-  return userWebpackConfig(factory(), options);
+  const conf = userWebpackConfig(factory(), options);
+  conf.merge({
+    resolve: {
+      root: [path.resolve(pwd, 'node_modules')]
+    }
+  });
+  return conf;
 };
 
 

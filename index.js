@@ -1,5 +1,5 @@
 'use strict';
-// const path = require('path');
+const path = require('path');
 const nib = require('nib');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -14,6 +14,7 @@ const generateCommonConfig = (conf, options) => {
     current.resolve.extensions = [
       '', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.vert', '.frag', '.glsl'
     ];
+    current.resolve.root = [path.resolve(__dirname, 'node_modules')];
     current.stylus = {
       use: [nib()],
       import: ['~nib/lib/nib/index.styl'],
