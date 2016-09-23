@@ -17,26 +17,33 @@ const jsioWebpack = require('./index');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 
+let serve = false;
 
 let arg = yargs
+  .usage('usage: $0 <command>')
   .option('v', {
     description: 'Enable verbose logging',
     default: false,
     type: 'boolean'
-  }).option('w', {
+  })
+  .option('w', {
     alias: 'watch',
     description: 'Watch files, compile on change',
     type: 'boolean',
     default: false
-  }).option('s', {
-    alias: 'serve',
-    description: 'Watch files, compile on change, serve from memory using webpack-dev-server',
-    type: 'boolean',
-    default: false
   })
-  .help('h');
-let mainArgv = arg.argv;
-
+  .command('serve', 'Watch files, compile on change, serve from memory using webpack-dev-server', (yargs) => {
+    arg = yargs
+      .option('h', {
+        alias: 'hot',
+        description: 'Use webpacks HotModuleReplacementPlugin',
+        default: false
+      })
+      .help('help');
+    serve = true;
+  })
+  .help('help');
+const mainArgv = arg.argv;
 
 
 const pwd = process.env.PWD;
@@ -65,22 +72,16 @@ prodConf.append((conf) => {
 
 const serveConf = multiConf.define('serve');
 serveConf.append((conf) => {
-  _.forEach(conf.entry, (v, k) => {
-    // 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:8080'
-    conf.entry[k] = [
-      'webpack/hot/only-dev-server',
-      'webpack-dev-server/client?http://localhost:8080/',
-      v
-    ];
-  });
   // Add HMR plugin
-  conf.plugin('webpackHMR', webpack.HotModuleReplacementPlugin);
+  if (mainArgv.hot) {
+    conf.plugin('webpackHMR', webpack.HotModuleReplacementPlugin);
+  }
   // Add sourcemap rules and devServer configs
   conf.merge({
     devtool: DEFAULT_DEVTOOL,
     devServer: {
       inline: true,
-      hot: true
+      hot: mainArgv.hot
     },
     output: {
       pathinfo: true
@@ -109,7 +110,7 @@ commonConf.append(jsioWebpack.generateCommonConfig);
 if (NODE_ENV === 'production') {
   commonConf.append('production');
 }
-if (mainArgv.serve) {
+if (serve) {
   commonConf.append('serve');
 } else if (mainArgv.watch) {
   commonConf.append('watch');
@@ -138,6 +139,21 @@ function appGenerator (factory, options) {
     userConfiguratorFn = userWebpackConfig;
   }
   const conf = userConfiguratorFn(userConfigurator, options);
+
+  // Apply some stuff after
+  if (serve) {
+    _.forEach(conf._config.entry, (v, k) => {
+      const newEntries = []
+      if (mainArgv.hot) {
+        newEntries.push('webpack/hot/only-dev-server');
+      }
+      newEntries.push('webpack-dev-server/client?http://localhost:8080/');
+      // Put the old one back
+      newEntries.push(v);
+      conf._config.entry[k] = newEntries;
+    });
+  }
+
   return conf;
 };
 
@@ -206,16 +222,15 @@ const onBuild = (err, stats) => {
 //
 
 
-
 console.log('\nBuilding...\n');
 
 let compiler = webpack(finalWebpackConfig);
 
-if (mainArgv.serve) {
+if (serve) {
   const server = new WebpackDevServer(compiler, {
     // webpack-dev-server options
     contentBase: process.env.PWD,
-    hot: true,
+    hot: mainArgv.hot,
     historyApiFallback: false,
 
     // webpack-dev-middleware options
