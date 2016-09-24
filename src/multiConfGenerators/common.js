@@ -46,6 +46,9 @@ module.exports = (conf, options) => {
     test: /\.jsx?$/,
     exclude: /(node_modules)/
   });
+  conf.preLoader('stylint', {
+    test: /\.styl$/
+  });
   // conf.preLoader('tslint', {})
 
   // LOADERS
@@ -63,7 +66,8 @@ module.exports = (conf, options) => {
     'babel-preset-react'
   ].map(require.resolve);
   const resolvedBabelPlugins = [
-    'babel-plugin-transform-object-assign'
+    'babel-plugin-transform-object-assign',
+    'babel-plugin-transform-object-rest-spread'
   ].map(require.resolve);
 
   conf.loader('ts', {
