@@ -24,7 +24,7 @@ module.exports = (conf, options) => {
   conf.merge((current) => {
     current.resolve = current.resolve || {};
     current.resolve.extensions = [
-      '', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.vert', '.frag', '.glsl'
+      '', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.jsx', '.vert', '.frag', '.glsl'
     ];
     const nodeModulesPath = path.resolve(__dirname, '..', '..', 'node_modules');
     current.resolve.fallback = nodeModulesPath;
