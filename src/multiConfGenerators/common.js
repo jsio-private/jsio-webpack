@@ -62,15 +62,24 @@ module.exports = (conf, options) => {
     'babel-preset-es2015',
     'babel-preset-react'
   ].map(require.resolve);
+  const resolvedBabelPlugins = [
+    'babel-plugin-transform-object-assign'
+  ].map(require.resolve);
 
   conf.loader('ts', {
     test: /\.tsx?$/,
     exclude: /node_modules/,
     // loader: tsLoaderString
     loaders: [
-      'babel-loader?' + resolvedBabelPresets.map(
-        p => `presets[]=${p}`
-      ).join('&'),
+      ('babel-loader?' +
+        resolvedBabelPresets.map(
+          p => `presets[]=${p}`
+        ).join('&') +
+        '&' +
+        resolvedBabelPlugins.map(
+          p => `plugins[]=${p}`
+        ).join('&')
+      ),
       'ts-loader?ignoreDiagnostics[]=2307'
     ]
   });
@@ -80,7 +89,8 @@ module.exports = (conf, options) => {
     // include: path.join(__dirname, 'src'),
     exclude: /(node_modules)/,
     query: {
-      presets: resolvedBabelPresets
+      presets: resolvedBabelPresets,
+      plugins: resolvedBabelPlugins
     }
   });
   conf.loader('file', {
