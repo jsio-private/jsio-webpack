@@ -91,3 +91,8 @@ This will cause all imported files from `node_modules` to be included in a separ
 #### `useBase64FontLoader`
 
 Uses [base64-font-loader](https://www.npmjs.com/package/base64-font-loader) to inline fonts.
+
+
+#### `useReactHot`
+
+Turns on [react-hot-loader](https://github.com/gaearon/react-hot-loader) for react component hot loading.

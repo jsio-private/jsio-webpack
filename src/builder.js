@@ -39,10 +39,10 @@ const appGenerator = (userConfig) => {
     if (config.isServer) {
       _.forEach(conf._config.entry, (v, k) => {
         const newEntries = []
+        newEntries.push('webpack-dev-server/client?http://localhost:8080/');
         if (config.useHMR) {
           newEntries.push('webpack/hot/only-dev-server');
         }
-        newEntries.push('webpack-dev-server/client?http://localhost:8080/');
         // Put the old one back
         newEntries.push(v);
         conf._config.entry[k] = newEntries;
@@ -85,7 +85,7 @@ const start = () => {
 
   const finalWebpackConfig = multiConf.resolve();
   console.log('Config ready:');
-  console.log(util.inspect(finalWebpackConfig, { colors: true, depth: 4 }));
+  console.log(util.inspect(finalWebpackConfig, { colors: true, depth: 5 }));
 
   console.log('\nBuilding...\n');
 

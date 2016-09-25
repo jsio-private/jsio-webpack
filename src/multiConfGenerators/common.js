@@ -61,29 +61,36 @@ module.exports = (conf, options) => {
     loader: 'worker-loader?inline=true'
   });
 
-  const resolvedBabelPresets = [
+  const babelPresets = [
     'babel-preset-es2015',
     'babel-preset-react'
-  ].map(require.resolve);
-  const resolvedBabelPlugins = [
+  ];
+  const resolvedBabelPresets = babelPresets.map(require.resolve);
+  const babelPlugins = [
     'babel-plugin-transform-object-assign',
     'babel-plugin-transform-object-rest-spread'
-  ].map(require.resolve);
+  ];
+  if (options.useReactHot) {
+    babelPlugins.push('react-hot-loader/babel');
+  }
+  const resolvedBabelPlugins = babelPlugins.map(require.resolve);
+  const babelLoaderString = (
+    'babel-loader?' +
+    resolvedBabelPresets.map(
+      p => `presets[]=${p}`
+    ).join('&') +
+    '&' +
+    resolvedBabelPlugins.map(
+      p => `plugins[]=${p}`
+    ).join('&')
+  );
 
   conf.loader('ts', {
     test: /\.tsx?$/,
     exclude: /node_modules/,
     // loader: tsLoaderString
     loaders: [
-      ('babel-loader?' +
-        resolvedBabelPresets.map(
-          p => `presets[]=${p}`
-        ).join('&') +
-        '&' +
-        resolvedBabelPlugins.map(
-          p => `plugins[]=${p}`
-        ).join('&')
-      ),
+      babelLoaderString,
       'ts-loader?ignoreDiagnostics[]=2307'
     ]
   });
@@ -92,11 +99,9 @@ module.exports = (conf, options) => {
     test: /\.jsx?$/,
     // include: path.join(__dirname, 'src'),
     exclude: /(node_modules)/,
-    query: {
-      presets: resolvedBabelPresets,
-      plugins: resolvedBabelPlugins
-    }
+    loaders: [babelLoaderString]
   });
+
   conf.loader('file', {
     test: /\.(jpe?g|gif|png|wav|mp3|ogv|mp4|webm)$/
   });
