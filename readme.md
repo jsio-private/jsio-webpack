@@ -96,3 +96,10 @@ Uses [base64-font-loader](https://www.npmjs.com/package/base64-font-loader) to i
 #### `useReactHot`
 
 Turns on [react-hot-loader](https://github.com/gaearon/react-hot-loader) for react component hot loading.
+
+
+#### `backendBuild`
+
+Builds your bundle to be used from command line with `node`.
+
+Make sure to install [source-map-support](https://github.com/evanw/node-source-map-support).

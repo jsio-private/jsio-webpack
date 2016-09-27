@@ -1,5 +1,7 @@
 'use strict';
+const fs = require('fs');
 const path = require('path');
+
 const nib = require('nib');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -16,6 +18,19 @@ const isExternal = (module) => {
     return false;
   }
   return userRequest.indexOf('/node_modules/') >= 0;
+};
+
+
+const findNodeModules = (dir) => {
+  const nodeModules = {};
+  fs.readdirSync(path.resolve(dir, 'node_modules'))
+    .filter((x) => {
+      return ['.bin'].indexOf(x) === -1;
+    })
+    .forEach((mod) => {
+      nodeModules[mod] = 'commonjs ' + mod;
+    });
+  return nodeModules;
 };
 
 
@@ -38,6 +53,19 @@ module.exports = (conf, options) => {
       import: ['~nib/lib/nib/index.styl'],
       preferPathResolver: 'webpack'
     }
+    current.stylint = {
+      options: {
+        config: {
+          colons: 'never'
+        }
+      }
+    };
+
+    if (options.backendBuild) {
+      current.target = 'node';
+      current.externals = findNodeModules(process.env.PWD);
+    }
+
     return current;
   });
 
@@ -103,7 +131,7 @@ module.exports = (conf, options) => {
   });
 
   conf.loader('file', {
-    test: /\.(jpe?g|gif|png|wav|mp3|ogv|mp4|webm)$/
+    test: /\.(jpe?g|gif|png|wav|mp3|ogv|ogg|mp4|webm)$/
   });
   conf.loader('glsl', {
     test: /\.(glsl|vert|frag)$/,
@@ -141,6 +169,13 @@ module.exports = (conf, options) => {
       name: 'vendors',
       minChunks: isExternal
     }]);
+  }
+
+  if (options.backendBuild) {
+    conf.plugin('sourceMapSupport', webpack.BannerPlugin, [
+      'require("source-map-support").install();',
+      { raw: true, entryOnly: false }
+    ]);
   }
 
 
