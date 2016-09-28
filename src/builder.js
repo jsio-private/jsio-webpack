@@ -92,6 +92,16 @@ const start = () => {
   let compiler = webpack(finalWebpackConfig);
 
   if (config.isServer) {
+    const mainConf = finalWebpackConfig[0];
+    const publicPath = (
+      mainConf &&
+      mainConf.output &&
+      mainConf.output.publicPath
+    );
+    if (!publicPath) {
+      throw new Error('First webpack config must specify output.publicPath');
+    }
+
     const server = new WebpackDevServer(compiler, {
       // webpack-dev-server options
       contentBase: process.env.PWD,
@@ -102,13 +112,13 @@ const start = () => {
       quiet: false,
       noInfo: false,
       lazy: false,
-      filename: 'bundle.js',
       // watchOptions: {
       //   aggregateTimeout: 300,
       //   poll: 1000
       // },
       // It's a required option.
-      publicPath: '/',
+      // FIXME: What happens if there is more than one chunk?
+      publicPath: publicPath,
       stats: { colors: true }
     });
 
