@@ -75,6 +75,13 @@ const buildUserDefinitions = (multiConf, userConfigs) => {
 };
 
 
+const printConfig = (title, data) => {
+  console.log(title);
+  console.log(util.inspect(data, { colors: true, depth: 5 }));
+  console.log('');
+};
+
+
 const start = () => {
   const userConfigs = getUserConfigs(process.env.PWD);
   const multiConf = newMultiConf();
@@ -84,8 +91,7 @@ const start = () => {
   multiConf.otherwise(_.map(userDefinitions, o => o.name).join('+'));
 
   const finalWebpackConfig = multiConf.resolve();
-  console.log('Config ready:');
-  console.log(util.inspect(finalWebpackConfig, { colors: true, depth: 5 }));
+  printConfig('Webpack Config:', finalWebpackConfig);
 
   console.log('\nBuilding...\n');
 
@@ -102,7 +108,7 @@ const start = () => {
       throw new Error('First webpack config must specify output.publicPath');
     }
 
-    const server = new WebpackDevServer(compiler, {
+    const devServerOpts = {
       // webpack-dev-server options
       contentBase: process.env.PWD,
       hot: config.useHMR,
@@ -120,7 +126,9 @@ const start = () => {
       // FIXME: What happens if there is more than one chunk?
       publicPath: publicPath,
       stats: { colors: true }
-    });
+    };
+    printConfig('Dev Server Config:', devServerOpts);
+    const server = new WebpackDevServer(compiler, devServerOpts);
 
     console.log('Starting server');
     server.listen(8080, 'localhost', () => {
