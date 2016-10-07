@@ -4,6 +4,7 @@
   "bin": {
     "jsio-webpack": "./bin/jsio-webpack.js"
   },
+  "main": "./src/index.js",
   "dependencies": {
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",

@@ -82,8 +82,15 @@ const printConfig = (title, data) => {
 };
 
 
-const start = () => {
-  const userConfigs = getUserConfigs(process.env.PWD);
+const start = (userConfigs, cb) => {
+  if (!userConfigs) {
+    userConfigs = getUserConfigs(process.env.PWD);
+  } else {
+    if (!Array.isArray(userConfigs)) {
+      userConfigs = [userConfigs];
+    }
+  }
+
   const multiConf = newMultiConf();
 
   const userDefinitions = buildUserDefinitions(multiConf, userConfigs);
@@ -96,6 +103,11 @@ const start = () => {
   console.log('\nBuilding...\n');
 
   let compiler = webpack(finalWebpackConfig);
+
+  const onComplete = function () {
+    compilerLogger.apply(null, arguments);
+    cb && cb();
+  };
 
   if (config.isServer) {
     const mainConf = finalWebpackConfig[0];
@@ -139,10 +151,10 @@ const start = () => {
     // const watcher =
     compiler.watch({
       aggregateTimeout: 300 // wait so long for more changes
-    }, compilerLogger);
+    }, onComplete);
   } else {
     compiler = webpack(finalWebpackConfig);
-    compiler.run(compilerLogger);
+    compiler.run(onComplete);
   }
 }
 
