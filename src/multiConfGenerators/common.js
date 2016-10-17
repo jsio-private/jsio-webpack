@@ -6,6 +6,7 @@ const nib = require('nib');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const chalk = require('chalk');
 
 const config = require('../config');
@@ -176,6 +177,12 @@ module.exports = (conf, options) => {
       'require("source-map-support").install();',
       { raw: true, entryOnly: false }
     ]);
+  }
+
+  if (options.useCircularDependencyPlugin) {
+    conf.plugin('CircularDependencyPlugin', CircularDependencyPlugin, [{
+      failOnError: false
+    }]);
   }
 
 
