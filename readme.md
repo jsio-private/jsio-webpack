@@ -103,3 +103,8 @@ Turns on [react-hot-loader](https://github.com/gaearon/react-hot-loader) for rea
 Builds your bundle to be used from command line with `node`.
 
 Make sure to install [source-map-support](https://github.com/evanw/node-source-map-support).
+
+
+#### `useCircularDependencyPlugin`
+
+Turns on [CircularDependencyPlugin](https://github.com/aackerman/circular-dependency-plugin).  Default behavior is to not fail on circular dependencies.
