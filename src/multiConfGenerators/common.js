@@ -35,6 +35,15 @@ const findNodeModules = (dir) => {
 };
 
 
+const resolveBabelPresets = (preset) => {
+  if (Array.isArray(preset)) {
+    preset[0] = require.resolve(preset[0]);
+    return preset;
+  }
+  return require.resolve(preset);
+};
+
+
 module.exports = (conf, options) => {
   // BASE CONFIG
   conf.merge((current) => {
@@ -91,10 +100,11 @@ module.exports = (conf, options) => {
   });
 
   const babelPresets = [
-    'babel-preset-es2015',
+    ['babel-preset-es2015', { loose: true }],
     'babel-preset-react'
   ];
-  const resolvedBabelPresets = babelPresets.map(require.resolve);
+  const resolvedBabelPresets = babelPresets.map(resolveBabelPresets);
+
   const babelPlugins = [
     'babel-plugin-transform-object-assign',
     'babel-plugin-transform-object-rest-spread'
@@ -102,17 +112,12 @@ module.exports = (conf, options) => {
   if (options.useReactHot) {
     babelPlugins.push('react-hot-loader/babel');
   }
-  const resolvedBabelPlugins = babelPlugins.map(require.resolve);
-  const babelLoaderString = (
-    'babel-loader?' +
-    resolvedBabelPresets.map(
-      p => `presets[]=${p}`
-    ).join('&') +
-    '&' +
-    resolvedBabelPlugins.map(
-      p => `plugins[]=${p}`
-    ).join('&')
-  );
+  const resolvedBabelPlugins = babelPlugins.map(resolveBabelPresets);
+
+  let babelLoaderString = 'babel-loader?' + JSON.stringify({
+    presets: resolvedBabelPresets,
+    plugins: resolvedBabelPlugins
+  });
 
   conf.loader('ts', {
     test: /\.tsx?$/,
