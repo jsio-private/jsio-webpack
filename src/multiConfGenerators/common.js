@@ -54,10 +54,28 @@ module.exports = (conf, options) => {
     const nodeModulesPath = path.resolve(__dirname, '..', '..', 'node_modules');
     current.resolve.fallback = nodeModulesPath;
     current.resolveLoader = current.resolveLoader || {};
+
+    const pwd = path.resolve(process.cwd());
     current.resolve.root = current.resolveLoader.root = [
-      path.resolve(process.env.PWD, 'node_modules'), // Project node_modules
+      path.join(pwd, 'node_modules'), // Project node_modules
       nodeModulesPath // jsio-webpack node_modules
     ];
+
+    // If jsio-webpack is installed as a dependency of the project being built,
+    // ensure that all parent directories are also used when loking for loaders.
+    // npm will install at the top most directory it can within a project
+    if (nodeModulesPath.indexOf(pwd) === 0) {
+      let testPath = path.dirname(nodeModulesPath);
+      let i = 0;
+      while (testPath !== pwd) {
+        if (i++ > 50) {
+          throw new Error('max depth exceeded');
+        }
+        current.resolveLoader.root.push(testPath);
+        testPath = path.dirname(testPath);
+      }
+    }
+
     current.stylus = {
       use: [nib()],
       import: ['~nib/lib/nib/index.styl'],
@@ -73,7 +91,7 @@ module.exports = (conf, options) => {
 
     if (options.backendBuild) {
       current.target = 'node';
-      current.externals = findNodeModules(process.env.PWD);
+      current.externals = findNodeModules(pwd);
     }
 
     return current;
