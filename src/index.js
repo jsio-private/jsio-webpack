@@ -1,6 +1,7 @@
 'use strict';
 const builder = require('./builder');
-
+const persistentRunner = require('./persistentRunner');
+const compilerLogger = require('./compilerLogger');
 
 const configure = (opts) => {
   throw new Error('TODO');
@@ -8,5 +9,8 @@ const configure = (opts) => {
 
 module.exports = {
   configure: configure,
-  build: builder.start
+  builder: builder,
+  build: builder.start,
+  persistentRunner: persistentRunner,
+  compilerLogger: compilerLogger
 };

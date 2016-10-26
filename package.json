@@ -49,5 +49,8 @@
   },
   "eslintConfig": {
     "extends": "jsio"
+  },
+  "devDependencies": {
+    "debug": "^2.2.0"
   }
 }
