@@ -1,4 +1,6 @@
 'use strict';
+const webpack = require('webpack');
+
 const builder = require('./builder');
 const persistentRunner = require('./persistentRunner');
 const compilerLogger = require('./compilerLogger');
@@ -12,5 +14,6 @@ module.exports = {
   builder: builder,
   build: builder.start,
   persistentRunner: persistentRunner,
-  compilerLogger: compilerLogger
+  compilerLogger: compilerLogger,
+  webpack: webpack
 };
