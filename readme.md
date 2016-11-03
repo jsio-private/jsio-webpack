@@ -108,3 +108,18 @@ Make sure to install [source-map-support](https://github.com/evanw/node-source-m
 #### `useCircularDependencyPlugin`
 
 Turns on [CircularDependencyPlugin](https://github.com/aackerman/circular-dependency-plugin).  Default behavior is to not fail on circular dependencies.
+
+
+#### `useModuleAliases`
+
+Lets modules define their own aliases.  Modules need to have a `package.json`, and need to follow this format:
+
+```json
+{
+  "jsioWebpack": {
+    "alias": {
+      "libName": "src"
+    }
+  }
+}
+```

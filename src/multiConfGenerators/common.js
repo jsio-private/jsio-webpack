@@ -2,14 +2,22 @@
 const fs = require('fs');
 const path = require('path');
 
+const Promise = require('bluebird');
+const colors = require('colors');
 const nib = require('nib');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const chalk = require('chalk');
+const npm = require('npm');
+const _ = require('lodash');
+const debug = require('debug');
 
 const config = require('../config');
+
+
+const log = debug('jsio-webpack:multiConf:common');
 
 
 // See: http://stackoverflow.com/a/38733864
@@ -44,7 +52,62 @@ const resolveBabelPresets = (preset) => {
 };
 
 
+const _handleModule = (npmModule, aliases) => {
+  return new Promise((resolve, reject) => {
+    const _aliases = _.get(npmModule, 'jsioWebpack.alias');
+    _.forEach(_aliases, (v, k) => {
+      if (aliases[k]) {
+        throw new Error(
+          'Alias collision: ' + k + ' (from ' + npmModule.path + ').' +
+          ' Existing alias: ' + aliases[k]
+        );
+      }
+      log('Adding alias from ' + npmModule.name + ': ' + k + ' -> ' + v);
+      aliases[k] = path.join(npmModule.path, v);
+    });
+
+
+    if (_.size(npmModule.dependencies) > 0) {
+      resolve(Promise.map(
+        Object.keys(npmModule.dependencies),
+        depKey => (
+          _handleModule(npmModule.dependencies[depKey], aliases)
+        ),
+        { concurrency: 1 }
+      ));
+      return;
+    }
+
+    resolve();
+  });
+};
+
+
+const getModuleAliases = (projectDir) => {
+  console.log('\n' + colors.green('Getting module aliases...') + '\n');
+  const aliases = {};
+  log('Loading npm');
+  return Promise.promisify(npm.load, npm)({})
+    .then((npm) => {
+      return new Promise((resolve, reject) => {
+        log('Running npm.list');
+        npm.list((stringList, res) => {
+          resolve(res);
+        });
+      });
+    })
+    .then((res) => {
+      return _handleModule(res, aliases);
+    })
+    .then(() => {
+      return aliases;
+    });
+};
+
+
 module.exports = (conf, options) => {
+  const pwd = path.resolve(process.cwd());
+
   // BASE CONFIG
   conf.merge((current) => {
     current.resolve = current.resolve || {};
@@ -55,7 +118,6 @@ module.exports = (conf, options) => {
     current.resolve.fallback = nodeModulesPath;
     current.resolveLoader = current.resolveLoader || {};
 
-    const pwd = path.resolve(process.cwd());
     current.resolve.root = current.resolveLoader.root = [
       path.join(pwd, 'node_modules'), // Project node_modules
       nodeModulesPath // jsio-webpack node_modules
@@ -228,5 +290,26 @@ module.exports = (conf, options) => {
     });
   }
 
-  return conf;
+  // TODO: Better promise support -- this whole function should be in a promise
+  // for proper error propagation
+  return new Promise((resolve, reject) => {
+    // module aliases
+    if (options.useModuleAliases) {
+      getModuleAliases(pwd)
+        .then((aliases) => {
+          log('Found aliases:', aliases);
+          conf.merge({
+            resolve: {
+              alias: aliases
+            }
+          });
+          return conf;
+        })
+        .then(() => {
+          resolve();
+        });
+    } else {
+      resolve();
+    }
+  });
 };

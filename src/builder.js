@@ -1,15 +1,15 @@
 'use strict';
-
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
+const Promise = require('bluebird');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const _ = require('lodash');
 
 const config = require('./config');
-const newMultiConf = require('./multiConf').newMultiConf;
+const multiConf = require('./multiConf');
 const compilerLogger = require('./compilerLogger');
 
 
@@ -29,48 +29,59 @@ const getUserConfigs = (dir) => {
 };
 
 
-const appGenerator = (userConfig) => {
-  return (factory, options) => {
-    const userConfigurator = factory();
-    let userConfiguratorFn = userConfig.configure || userConfig;
-    const conf = userConfiguratorFn(userConfigurator, options);
+const buildMultiConfs = (userConfigs) => {
+  return Promise.map(userConfigs, (userConfig) => {
+    const _multiConf = new multiConf.MultiConf();
+    _multiConf.userConfig = userConfig;
 
-    // Apply some stuff after
+    const userConfiguratorFn = userConfig.configure || userConfig;
+    const configs = [
+      userConfiguratorFn,
+      multiConf.getConfigFn('common')
+    ];
+
+    if (config.env === 'production') {
+      configs.push('production');
+    }
     if (config.isServer) {
-      _.forEach(conf._config.entry, (v, k) => {
-        const newEntries = []
-        newEntries.push('webpack-dev-server/client?http://localhost:8080/');
-        if (config.useHMR) {
-          newEntries.push('webpack/hot/only-dev-server');
-        }
-        // Put the old one back
-        newEntries.push(v);
-        conf._config.entry[k] = newEntries;
-      });
+      configs.push('serve');
+    } else if (config.watch) {
+      configs.push('watch');
     }
 
-    return conf;
-  };
-};
+    return Promise.map(configs, c => {
+      return _multiConf.append(c);
+    }, { concurrency: 1 }).then(() => {
+      return _multiConf;
+    });
+  }, { concurrency: 1 }).then(multiConfs => {
+    return Promise.map(multiConfs, (multiConf) => {
+      // Apply some stuff after
+      if (config.isServer) {
+        _.forEach(multiConf._config.entry, (v, k) => {
+          const newEntries = []
+          newEntries.push('webpack-dev-server/client?http://localhost:8080/');
+          if (config.useHMR) {
+            newEntries.push('webpack/hot/only-dev-server');
+          }
+          // Put the old one back
+          newEntries.push(v);
+          multiConf._config.entry[k] = newEntries;
+        });
+      }
+      return multiConf;
+    });
+  }).then(multiConfs => {
+    return Promise.map(multiConfs, (multiConf) => {
+      // Let the project customize the final config before generation
+      const postConfigureFn = multiConf.userConfig.postConfigure;
+      if (postConfigureFn) {
+        return multiConf.append(postConfigureFn).then(() => multiConf);
+      }
 
-
-const buildUserDefinitions = (multiConf, userConfigs) => {
-  return _.map(userConfigs, (userConfig, i) => {
-    const appConfName = 'app' + i;
-    const appConf = multiConf.define(appConfName);
-    appConf.generate(appGenerator(userConfig));
-    appConf.append('common');
-
-    // Let the project customize the final config before generation
-    const postConfigure = userConfig.postConfigure;
-    if (postConfigure) {
-      appConf.append(postConfigure);
-    }
-
-    return {
-      name: appConfName,
-      appConf: appConf
-    }
+      // Finalize
+      return multiConf;
+    });
   });
 };
 
@@ -83,82 +94,80 @@ const printConfig = (title, data) => {
 
 
 const getWebpackConfig = (userConfigs) => {
-  if (!userConfigs) {
-    userConfigs = getUserConfigs(process.env.PWD);
-  } else {
-    if (!Array.isArray(userConfigs)) {
-      userConfigs = [userConfigs];
+  return (new Promise((resolve, reject) => {
+    if (!userConfigs) {
+      userConfigs = getUserConfigs(process.env.PWD);
+    } else {
+      if (!Array.isArray(userConfigs)) {
+        userConfigs = [userConfigs];
+      }
     }
-  }
-
-  const multiConf = newMultiConf();
-  const userDefinitions = buildUserDefinitions(multiConf, userConfigs);
-
-  multiConf.otherwise(_.map(userDefinitions, o => o.name).join('+'));
-
-  const finalWebpackConfig = multiConf.resolve();
-  printConfig('Webpack Config:', finalWebpackConfig);
-  return finalWebpackConfig;
+    resolve(buildMultiConfs(userConfigs));
+  })).then(userDefinitions => {
+    const finalWebpackConfig = _.map(userDefinitions, mc => mc.resolve());
+    printConfig('Webpack Config:', finalWebpackConfig);
+    return finalWebpackConfig;
+  });
 };
 
 
 const start = (userConfigs, cb) => {
-  const finalWebpackConfig = getWebpackConfig(userConfigs);
+  return getWebpackConfig(userConfigs).then((finalWebpackConfig) => {
+    console.log('\nBuilding...\n');
 
-  console.log('\nBuilding...\n');
+    let compiler = webpack(finalWebpackConfig);
 
-  let compiler = webpack(finalWebpackConfig);
-
-  const onComplete = function () {
-    compilerLogger.apply(null, arguments);
-    cb && cb();
-  };
-
-  if (config.isServer) {
-    const mainConf = finalWebpackConfig[0];
-    const publicPath = (
-      mainConf &&
-      mainConf.output &&
-      mainConf.output.publicPath
-    );
-    if (!publicPath) {
-      throw new Error('First webpack config must specify output.publicPath');
-    }
-
-    const devServerOpts = {
-      // webpack-dev-server options
-      contentBase: process.env.PWD,
-      hot: config.useHMR,
-      historyApiFallback: false,
-
-      // webpack-dev-middleware options
-      quiet: false,
-      noInfo: false,
-      lazy: false,
-      // watchOptions: {
-      //   aggregateTimeout: 300,
-      //   poll: 1000
-      // },
-      // It's a required option.
-      // FIXME: What happens if there is more than one chunk?
-      publicPath: publicPath,
-      stats: { colors: true }
+    const onComplete = function () {
+      compilerLogger.apply(null, arguments);
+      cb && cb();
     };
-    printConfig('Dev Server Config:', devServerOpts);
-    const server = new WebpackDevServer(compiler, devServerOpts);
 
-    console.log('Starting server');
-    server.listen(8080, 'localhost', () => {
-      console.log('> Server ready');
-    });
-  } else if (config.watch) {
-    // const watcher =
-    compiler.watch({
-      aggregateTimeout: 300 // wait so long for more changes
-    }, onComplete);
-  } else {
-    compiler.run(onComplete);
-  }
+    if (config.isServer) {
+      const mainConf = finalWebpackConfig[0];
+      const publicPath = (
+        mainConf &&
+        mainConf.output &&
+        mainConf.output.publicPath
+      );
+      if (!publicPath) {
+        throw new Error('First webpack config must specify output.publicPath');
+      }
+
+      const devServerOpts = {
+        // webpack-dev-server options
+        contentBase: process.env.PWD,
+        hot: config.useHMR,
+        historyApiFallback: false,
+
+        // webpack-dev-middleware options
+        quiet: false,
+        noInfo: false,
+        lazy: false,
+        // watchOptions: {
+        //   aggregateTimeout: 300,
+        //   poll: 1000
+        // },
+        // It's a required option.
+        // FIXME: What happens if there is more than one chunk?
+        publicPath: publicPath,
+        stats: { colors: true }
+      };
+      printConfig('Dev Server Config:', devServerOpts);
+      const server = new WebpackDevServer(compiler, devServerOpts);
+
+      console.log('Starting server');
+      server.listen(8080, 'localhost', () => {
+        console.log('> Server ready');
+      });
+    } else if (config.watch) {
+      // const watcher =
+      compiler.watch({
+        aggregateTimeout: 300 // wait so long for more changes
+      }, onComplete);
+    } else {
+      compiler.run(onComplete);
+    }
+  });
 }
 
 
