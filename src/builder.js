@@ -41,12 +41,12 @@ const buildMultiConfs = (userConfigs) => {
     ];
 
     if (config.env === 'production') {
-      configs.push('production');
+      configs.push(multiConf.getConfigFn('production'));
     }
     if (config.isServer) {
-      configs.push('serve');
+      configs.push(multiConf.getConfigFn('serve'));
     } else if (config.watch) {
-      configs.push('watch');
+      configs.push(multiConf.getConfigFn('watch'));
     }
 
     return Promise.map(configs, c => {
