@@ -14,6 +14,8 @@ const npm = require('npm');
 const _ = require('lodash');
 const debug = require('debug');
 
+const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
+
 const config = require('../config');
 
 
@@ -288,6 +290,13 @@ module.exports = (conf, options) => {
       test: /\.styl$/,
       loader: 'style-loader!css-loader!stylus-loader'
     });
+  }
+
+  const encryptionKey = process.env.WEBPACK_ENCRYPTION_KEY;
+  if (encryptionKey) {
+    conf.plugin('BuildEncryption', EncryptedBuildPlugin, [{
+      encryptionKey: encryptionKey
+    }]);
   }
 
   // TODO: Better promise support -- this whole function should be in a promise
