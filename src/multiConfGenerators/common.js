@@ -304,7 +304,7 @@ module.exports = (conf, options) => {
   return new Promise((resolve, reject) => {
     // module aliases
     if (options.useModuleAliases) {
-      getModuleAliases(pwd)
+      return getModuleAliases(pwd)
         .then((aliases) => {
           log('Found aliases:', aliases);
           conf.merge({
