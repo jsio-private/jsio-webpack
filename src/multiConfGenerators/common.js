@@ -179,13 +179,16 @@ module.exports = (conf, options) => {
   // LOADERS
   conf.loader('json-schema', {
     test: /\.schema\.json$/,
-    loader: 'json-schema-loader'
+    loaders: ['json-schema-loader?useSource=true', 'webpack-comment-remover-loader']
   });
 
   // Note: this throws weird errors sometimes.  First thing to try if it
   // fails to parse your file: `import x from '!json!x';`
   conf.loader('json', {
-    test: /\.json$/
+    // Ugly regex to exclude schema.json files
+    test: /^[^\.]+?(?!\.schema)\.json$/,
+    // test: /\.json$/,
+    loaders: ['json-loader', 'webpack-comment-remover-loader']
   });
 
   conf.loader('worker', {
