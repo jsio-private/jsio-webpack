@@ -115,7 +115,11 @@ module.exports = (conf, options) => {
   conf.merge((current) => {
     current.resolve = current.resolve || {};
     current.resolve.extensions = [
-      '', '.webpack.js', '.web.js', '.ts', '.tsx', '.js', '.jsx', '.vert', '.frag', '.glsl'
+      '', '.webpack.js', '.web.js',
+      '.ts', '.tsx',
+      '.js', '.jsx',
+      '.vert', '.frag', '.glsl',
+      '.schema.json'
     ];
     const nodeModulesPath = path.resolve(__dirname, '..', '..', 'node_modules');
     current.resolve.fallback = nodeModulesPath;
@@ -173,9 +177,16 @@ module.exports = (conf, options) => {
   // conf.preLoader('tslint', {})
 
   // LOADERS
+  conf.loader('json-schema', {
+    test: /\.schema\.json$/,
+    loader: 'json-schema-loader'
+  });
+
   // Note: this throws weird errors sometimes.  First thing to try if it
   // fails to parse your file: `import x from '!json!x';`
-  conf.loader('json', { test: /\.json$/ });
+  conf.loader('json', {
+    test: /\.json$/
+  });
 
   conf.loader('worker', {
     test: /\.worker\.js$/,
