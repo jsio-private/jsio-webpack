@@ -1,9 +1,9 @@
 const config = require('../config');
 
 
-module.exports = (conf) => {
+module.exports = (conf, options) => {
   conf.merge({
-    devtool: config.devtool,
+    devtool: options.devtool || config.devtool,
     watch: true,
     output: {
       pathinfo: true
