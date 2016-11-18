@@ -17,8 +17,8 @@
     "chalk": "^1.1.3",
     "circular-dependency-plugin": "^2.0.0",
     "css-loader": "^0.24.0",
-    "eslint": "^3.3.1",
     "encrypted-build-webpack-plugin": "git+https://github.com/jsio-private/encrypted-build-webpack-plugin.git",
+    "eslint": "^3.3.1",
     "eslint-config-jsio": "git+https://github.com/jsio-private/eslint-config-jsio.git",
     "eslint-loader": "^1.5.0",
     "eslint-plugin-promise": "^2.0.1",
@@ -46,6 +46,7 @@
     "webpack": "^1.13.2",
     "webpack-configurator": "^0.3.1",
     "webpack-dev-server": "^1.16.1",
+    "webpack-error-notification": "^0.1.6",
     "worker-loader": "^0.7.1",
     "yargs": "^5.0.0"
   },

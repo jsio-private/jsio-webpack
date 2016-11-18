@@ -123,3 +123,16 @@ Lets modules define their own aliases.  Modules need to have a `package.json`, a
   }
 }
 ```
+
+
+#### `useNotifications`
+
+Will enable the [webpack-error-notification](https://www.npmjs.com/package/webpack-error-notification) plugin, which will create system notifications when the build status changes.
+
+_Note: Taken from the webpack-error-notification readme:_
+
+For Mac OS (10.8+) you need to install terminal-notifier, the easy way is to use Homebrew:
+
+```bash
+brew install terminal-notifier
+```

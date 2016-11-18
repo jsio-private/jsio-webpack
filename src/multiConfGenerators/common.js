@@ -8,6 +8,7 @@ const nib = require('nib');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const WebpackErrorNotificationPlugin = require('webpack-error-notification');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 const chalk = require('chalk');
 const npm = require('npm');
@@ -270,6 +271,10 @@ module.exports = (conf, options) => {
     conf.plugin('CircularDependencyPlugin', CircularDependencyPlugin, [{
       failOnError: false
     }]);
+  }
+
+  if (options.useNotifications) {
+    conf.plugin('Notification', WebpackErrorNotificationPlugin, []);
   }
 
 
