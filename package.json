@@ -40,7 +40,7 @@
     "stylint-loader": "^1.0.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^2.3.1",
-    "ts-loader": "^0.8.2",
+    "ts-loader": "^1.2.1",
     "typescript": "^2.0.3",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.2",

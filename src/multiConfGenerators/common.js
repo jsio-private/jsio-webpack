@@ -208,7 +208,7 @@ module.exports = (conf, options) => {
     // loader: tsLoaderString
     loaders: [
       babelLoaderString,
-      'ts-loader?ignoreDiagnostics[]=2307'
+      'ts-loader?visualStudioErrorFormat=true&ignoreDiagnostics[]=2307'
     ]
   });
 
