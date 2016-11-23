@@ -50,6 +50,7 @@
     "webpack-dev-server": "^1.16.1",
     "webpack-error-notification": "^0.1.6",
     "worker-loader": "^0.7.1",
+    "xml-loader": "^1.1.0",
     "yargs": "^5.0.0"
   },
   "eslintConfig": {

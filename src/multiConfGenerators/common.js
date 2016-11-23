@@ -233,6 +233,10 @@ module.exports = (conf, options) => {
     loaders: [babelLoaderString]
   });
 
+  conf.loader('xml', {
+    test: /\.(xml)$/
+  });
+
   conf.loader('file', {
     test: /\.(jpe?g|gif|png|wav|mp3|ogv|ogg|mp4|webm)$/
   });
