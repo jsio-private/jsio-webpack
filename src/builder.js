@@ -58,7 +58,8 @@ const buildMultiConfs = (userConfigs) => {
     return Promise.map(multiConfs, (multiConf) => {
       // Apply some stuff after
       if (config.isServer) {
-        _.forEach(multiConf._config.entry, (v, k) => {
+        const webpackConfig = multiConf.configurator._config;
+        _.forEach(webpackConfig.entry, (v, k) => {
           const newEntries = []
           newEntries.push('webpack-dev-server/client?http://localhost:8080/');
           if (config.useHMR) {
@@ -66,7 +67,7 @@ const buildMultiConfs = (userConfigs) => {
           }
           // Put the old one back
           newEntries.push(v);
-          multiConf._config.entry[k] = newEntries;
+          webpackConfig.entry[k] = newEntries;
         });
       }
       return multiConf;
