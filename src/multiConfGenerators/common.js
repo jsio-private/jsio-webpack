@@ -196,10 +196,13 @@ module.exports = (conf, options) => {
     loader: 'worker-loader?inline=true'
   });
 
-  const babelPresets = [
-    ['babel-preset-es2015', { loose: true }],
-    'babel-preset-react'
-  ];
+  const babelPresets = [];
+  if (options.es2015WithoutStrict) {
+    babelPresets.push('babel-preset-es2015-without-strict');
+  } else {
+    babelPresets.push(['babel-preset-es2015', { loose: true }]);
+  }
+  babelPresets.push('babel-preset-react');
   const resolvedBabelPresets = babelPresets.map(resolveBabelPresets);
 
   const babelPlugins = [

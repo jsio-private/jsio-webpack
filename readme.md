@@ -136,3 +136,9 @@ For Mac OS (10.8+) you need to install terminal-notifier, the easy way is to use
 ```bash
 brew install terminal-notifier
 ```
+
+
+
+# `es2015WithoutStrict`
+
+Will use `babel-preset-es2015-without-strict` instead of `babel-preset-es2015`.
