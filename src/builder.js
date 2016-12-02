@@ -156,8 +156,10 @@ const start = (userConfigs, cb) => {
       printConfig('Dev Server Config:', devServerOpts);
       const server = new WebpackDevServer(compiler, devServerOpts);
 
-      console.log('Starting server');
-      server.listen(8080, 'localhost', () => {
+      const listenHost = 'localhost';
+      const listenPort = config.port;
+      console.log(`\n\nStarting server on http://${listenHost}:${listenPort}\n\n`);
+      server.listen(listenPort, listenHost, () => {
         console.log('> Server ready');
       });
     } else if (config.watch) {

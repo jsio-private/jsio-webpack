@@ -9,5 +9,6 @@ module.exports = {
   verbose: false,
   isServer: false,
   watch: false,
-  useHMR: false
+  useHMR: false,
+  port: 8080
 };

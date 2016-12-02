@@ -138,7 +138,6 @@ brew install terminal-notifier
 ```
 
 
-
-# `es2015WithoutStrict`
+#### `es2015WithoutStrict`
 
 Will use `babel-preset-es2015-without-strict` instead of `babel-preset-es2015`.
