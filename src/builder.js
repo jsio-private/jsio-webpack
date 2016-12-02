@@ -61,7 +61,7 @@ const buildMultiConfs = (userConfigs) => {
         const webpackConfig = multiConf.configurator._config;
         _.forEach(webpackConfig.entry, (v, k) => {
           const newEntries = []
-          newEntries.push('webpack-dev-server/client?http://localhost:8080/');
+          newEntries.push(`webpack-dev-server/client?http://localhost:${config.port}/`);
           if (config.useHMR) {
             newEntries.push('webpack/hot/only-dev-server');
           }
