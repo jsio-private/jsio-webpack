@@ -4,7 +4,7 @@ const config = require('../config');
 
 module.exports = (conf, options) => {
   // Add HMR plugin
-  if (config.useHMR) {
+  if (config.serve.useHMR) {
     conf.plugin('webpackHMR', webpack.HotModuleReplacementPlugin);
   }
   // Add sourcemap rules and devServer configs
@@ -12,7 +12,7 @@ module.exports = (conf, options) => {
     devtool: options.devtool || config.devtool,
     devServer: {
       inline: true,
-      hot: config.useHMR
+      hot: config.serve.useHMR
     },
     output: {
       pathinfo: true

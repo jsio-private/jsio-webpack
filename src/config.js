@@ -9,6 +9,9 @@ module.exports = {
   verbose: false,
   isServer: false,
   watch: false,
-  useHMR: false,
-  port: 8080
+  serve: {
+    useHMR: false,
+    host: 'localhost',
+    port: 8080
+  }
 };

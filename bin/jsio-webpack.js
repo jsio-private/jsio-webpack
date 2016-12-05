@@ -25,12 +25,12 @@ let arg = yargs
       .option('h', {
         alias: 'hot',
         description: 'Use webpacks HotModuleReplacementPlugin',
-        default: config.useHMR
+        default: config.serve.useHMR
       })
       .option('p', {
         alias: 'port',
         description: 'Port for the webpack-dev-server to listen on',
-        default: config.port
+        default: config.serve.port
       })
       .help('help');
     config.isServer = true;
@@ -41,8 +41,8 @@ const mainArgv = arg.argv;
 // Update config
 config.verbose = mainArgv.v;
 config.watch = mainArgv.watch;
-config.useHMR = mainArgv.hot;
-config.port = mainArgv.port;
+config.serve.useHMR = mainArgv.hot;
+config.serve.port = mainArgv.port;
 
 // Start it up!
 builder.start();
