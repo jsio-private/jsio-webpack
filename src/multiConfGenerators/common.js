@@ -14,6 +14,7 @@ const chalk = require('chalk');
 const npm = require('npm');
 const _ = require('lodash');
 const debug = require('debug');
+const nodeExternals = require('webpack-node-externals');
 
 const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
 
@@ -30,19 +31,6 @@ const isExternal = (module) => {
     return false;
   }
   return userRequest.indexOf('/node_modules/') >= 0;
-};
-
-
-const findNodeModules = (dir) => {
-  const nodeModules = {};
-  fs.readdirSync(path.resolve(dir, 'node_modules'))
-    .filter((x) => {
-      return ['.bin'].indexOf(x) === -1;
-    })
-    .forEach((mod) => {
-      nodeModules[mod] = 'commonjs ' + mod;
-    });
-  return nodeModules;
 };
 
 
@@ -160,7 +148,7 @@ module.exports = (conf, options) => {
 
     if (options.backendBuild) {
       current.target = 'node';
-      current.externals = findNodeModules(pwd);
+      current.externals = [nodeExternals()];
     }
 
     return current;

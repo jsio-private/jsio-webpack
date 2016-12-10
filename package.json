@@ -51,6 +51,7 @@
     "webpack-configurator": "^0.3.1",
     "webpack-dev-server": "^1.16.1",
     "webpack-error-notification": "^0.1.6",
+    "webpack-node-externals": "^1.5.4",
     "worker-loader": "^0.7.1",
     "xml-loader": "^1.1.0",
     "yargs": "^5.0.0"
