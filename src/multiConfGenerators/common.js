@@ -148,7 +148,7 @@ module.exports = (conf, options) => {
 
     if (options.backendBuild) {
       current.target = 'node';
-      current.externals = [nodeExternals()];
+      current.externals = [nodeExternals(options.nodeExternalsOpts)];
     }
 
     return current;
@@ -207,13 +207,6 @@ module.exports = (conf, options) => {
     plugins: resolvedBabelPlugins
   });
 
-
-  // Typescript
-  let ignoreDiagnostics = [2307];
-  const userIgnoreDiagnostics = options.typescriptIgnoreDiagnostics;
-  if (userIgnoreDiagnostics) {
-    ignoreDiagnostics = ignoreDiagnostics.concat(userIgnoreDiagnostics);
-  }
   conf.loader('ts', {
     test: /\.tsx?$/,
     exclude: /node_modules/,
@@ -222,7 +215,7 @@ module.exports = (conf, options) => {
       babelLoaderString,
       'ts-loader?' + JSON.stringify({
         visualStudioErrorFormat: true,
-        ignoreDiagnostics: ignoreDiagnostics
+        ignoreDiagnostics: options.typescriptIgnoreDiagnostics
       })
     ]
   });

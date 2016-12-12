@@ -10,7 +10,24 @@ const commonGen = require('./multiConfGenerators/common');
 class MultiConf {
   constructor () {
     this.configurator = new WebpackConfigurator();
-    this.options = {};
+    this.options = {
+      useStylusExtractText: false,
+      useVendorChunk: false,
+      useBase64FontLoader: false,
+      useReactHot: false,
+      backendBuild: false,
+      useCircularDependencyPlugin: false,
+      useModuleAliases: false,
+      useNotifications: false,
+      es2015WithoutStrict: false,
+      typescriptIgnoreDiagnostics: [
+        // Cannot find module
+        2307
+      ],
+      nodeExternalsOpts: {
+        modulesFromFile: true
+      }
+    };
   }
 
   append (configFn) {

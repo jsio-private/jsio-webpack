@@ -145,13 +145,18 @@ Will use `babel-preset-es2015-without-strict` instead of `babel-preset-es2015`.
 
 #### `typescriptIgnoreDiagnostics`
 
-Should be an array of numbers.
+Should be an array of numbers. Example:
 
 ``` js
-options.typescriptIgnoreDiagnostics = [
+options.typescriptIgnoreDiagnostics = options.typescriptIgnoreDiagnostics.concat([
   // Module 'xxx' has no default export.
   1192,
   // Module 'xxx' has no exported member 'default'.
   2305
-];
+]);
 ```
+
+
+#### `nodeExternalsOpts`
+
+Passed to [webpack-node-externals](https://www.npmjs.com/package/webpack-node-externals#configuration).
