@@ -141,3 +141,17 @@ brew install terminal-notifier
 #### `es2015WithoutStrict`
 
 Will use `babel-preset-es2015-without-strict` instead of `babel-preset-es2015`.
+
+
+#### `typescriptIgnoreDiagnostics`
+
+Should be an array of numbers.
+
+``` js
+options.typescriptIgnoreDiagnostics = [
+  // Module 'xxx' has no default export.
+  1192,
+  // Module 'xxx' has no exported member 'default'.
+  2305
+];
+```

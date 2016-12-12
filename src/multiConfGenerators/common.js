@@ -207,13 +207,23 @@ module.exports = (conf, options) => {
     plugins: resolvedBabelPlugins
   });
 
+
+  // Typescript
+  let ignoreDiagnostics = [2307];
+  const userIgnoreDiagnostics = options.typescriptIgnoreDiagnostics;
+  if (userIgnoreDiagnostics) {
+    ignoreDiagnostics = ignoreDiagnostics.concat(userIgnoreDiagnostics);
+  }
   conf.loader('ts', {
     test: /\.tsx?$/,
     exclude: /node_modules/,
     // loader: tsLoaderString
     loaders: [
       babelLoaderString,
-      'ts-loader?visualStudioErrorFormat=true&ignoreDiagnostics[]=2307'
+      'ts-loader?' + JSON.stringify({
+        visualStudioErrorFormat: true,
+        ignoreDiagnostics: ignoreDiagnostics
+      })
     ]
   });
 
