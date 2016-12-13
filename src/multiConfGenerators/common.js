@@ -146,6 +146,9 @@ module.exports = (conf, options) => {
       }
     };
 
+    // If the user wants, forward one, otherwise no devtool
+    current.devtool = options.devtool;
+
     if (options.backendBuild) {
       current.target = 'node';
       current.externals = [nodeExternals(options.nodeExternalsOpts)];
