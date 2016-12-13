@@ -21,6 +21,10 @@ class MultiConf {
       useNotifications: false,
       es2015WithoutStrict: false,
       typescriptIgnoreDiagnostics: [
+        // Module 'xxx' has no default export.
+        1192,
+        // Module 'xxx' has no exported member 'default'.
+        2305,
         // Cannot find module
         2307
       ],
