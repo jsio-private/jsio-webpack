@@ -15,6 +15,7 @@ const npm = require('npm');
 const _ = require('lodash');
 const debug = require('debug');
 const nodeExternals = require('webpack-node-externals');
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
 
 const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
 
@@ -259,9 +260,27 @@ module.exports = (conf, options) => {
   }
 
   // PLUGINS
-  conf.plugin('webpackDefine', webpack.DefinePlugin, [{
-    'process.env.NODE_ENV': JSON.stringify(config.env)
-  }]);
+  const defines = {
+    'process.env.NODE_ENV': config.env,
+    'process.env.COMMITHASH': '<DISABLED>'
+  };
+
+  if (
+    (
+      options.useGitRevisionPlugin === 'production'
+      && process.env.NODE_ENV === 'production'
+    )
+    || (
+      options.useGitRevisionPlugin === 'always'
+    )
+  ) {
+    const gitRevisionPlugin = new GitRevisionPlugin();
+    defines['process.env.COMMITHASH'] = gitRevisionPlugin.commithash();
+  }
+
+  conf.plugin('webpackDefine', webpack.DefinePlugin, [
+    _.mapValues(defines, v => JSON.stringify(v))
+  ]);
 
   conf.plugin('progressBar', ProgressBarPlugin, [{
     renderThrottle: 100,

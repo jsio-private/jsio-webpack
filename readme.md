@@ -160,3 +160,16 @@ options.typescriptIgnoreDiagnostics = options.typescriptIgnoreDiagnostics.concat
 #### `nodeExternalsOpts`
 
 Passed to [webpack-node-externals](https://www.npmjs.com/package/webpack-node-externals#configuration).
+
+
+#### `useGitRevisionPlugin`
+
+| Value | Default | Description |
+| ---- | ---- | ---- |
+| `'never'` | yes |  |
+| `'always'` |  |  |
+| `'production'` |  | Only when `NODE_ENV=production`. |
+
+When active, this will define `process.env.COMMITHASH`.  The constant will contain a string representation of the curring HEAD hash.
+
+All other builds the constant will contain `'<DISABLED>'`.

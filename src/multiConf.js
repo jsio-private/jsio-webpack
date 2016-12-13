@@ -20,6 +20,7 @@ class MultiConf {
       useModuleAliases: false,
       useNotifications: false,
       es2015WithoutStrict: false,
+      useGitRevisionPlugin: 'never',
       typescriptIgnoreDiagnostics: [
         // Module 'xxx' has no default export.
         1192,
