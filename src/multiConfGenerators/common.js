@@ -189,10 +189,12 @@ module.exports = (conf, options) => {
   });
 
   const babelPresets = [];
-  if (options.es2015WithoutStrict) {
+  if (options.es2015 === 'default') {
+    babelPresets.push(['babel-preset-es2015', { loose: true }]);
+  } else if (options.es2015 === 'without-strict') {
     babelPresets.push('babel-preset-es2015-without-strict');
   } else {
-    babelPresets.push(['babel-preset-es2015', { loose: true }]);
+    throw new Error(`Unknown es2015 value: ${options.es2015}`);
   }
   babelPresets.push('babel-preset-react');
   const resolvedBabelPresets = babelPresets.map(resolveBabelPresets);

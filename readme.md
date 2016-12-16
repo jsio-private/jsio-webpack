@@ -138,9 +138,15 @@ brew install terminal-notifier
 ```
 
 
-#### `es2015WithoutStrict`
+#### `es2015`
 
-Will use `babel-preset-es2015-without-strict` instead of `babel-preset-es2015`.
+Can be any of the following:
+
+| Value | Description |
+| ---- | ---- |
+| `'default'` | [babel-preset-es2015](https://www.npmjs.com/package/babel-preset-es2015) |
+| `'without-strict'` | [babel-preset-es2015-without-strict](https://www.npmjs.com/package/babel-preset-es2015-without-strict) |
+
 
 
 #### `typescriptIgnoreDiagnostics`
