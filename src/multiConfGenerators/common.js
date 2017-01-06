@@ -16,6 +16,7 @@ const _ = require('lodash');
 const debug = require('debug');
 const nodeExternals = require('webpack-node-externals');
 const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const Visualizer = require('webpack-visualizer-plugin');
 
 const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
 
@@ -313,6 +314,9 @@ module.exports = (conf, options) => {
     conf.plugin('Notification', WebpackErrorNotificationPlugin, []);
   }
 
+  if (options.useVisualizerPlugin) {
+    conf.plugin('Visualizer', Visualizer, []);
+  }
 
   if (config.env === 'production' && options.useStylusExtractText) {
     // Use ExtractTextPlugin for production

@@ -7,11 +7,17 @@ module.exports = {
   devtool: 'eval-source-map',
   // CLI options
   verbose: false,
-  isServer: false,
   watch: false,
+  isServer: false,
   serve: {
     useHMR: false,
     host: 'localhost',
     port: 8080
+  },
+  isKarma: false,
+  karma: {
+    port: 9876,
+    files: 'tests/index.js',
+    preprocessorKeys: 'tests,src'
   }
 };

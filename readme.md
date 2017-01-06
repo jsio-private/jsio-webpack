@@ -179,3 +179,8 @@ Passed to [webpack-node-externals](https://www.npmjs.com/package/webpack-node-ex
 When active, this will define `process.env.COMMITHASH`.  The constant will contain a string representation of the curring HEAD hash.
 
 All other builds the constant will contain `'<DISABLED>'`.
+
+
+#### `useVisualizerPlugin`
+
+Will output a `stats.html` in your project directory, using [webpack-visualizer-plugin](https://www.npmjs.com/package/webpack-visualizer-plugin);

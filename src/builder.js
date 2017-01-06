@@ -112,7 +112,7 @@ const getWebpackConfig = (userConfigs) => {
 };
 
 
-const start = (userConfigs, cb) => {
+const start = function (userConfigs, cb) {
   return getWebpackConfig(userConfigs).then((finalWebpackConfig) => {
     console.log('\nBuilding...\n');
 
@@ -171,7 +171,7 @@ const start = (userConfigs, cb) => {
       compiler.run(onComplete);
     }
   });
-}
+};
 
 
 module.exports = {
