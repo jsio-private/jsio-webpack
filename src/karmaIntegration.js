@@ -40,8 +40,13 @@ const runKarma = function () {
     // });
 
     // Pass config to karma
-    const karmaConfig = {
+    let karmaConfig = {
       browsers: ['Chrome'], // run in Chrome
+
+      browserNoActivityTimeout: 15000,
+      browserDisconnectTimeout: 60000,
+      browserDisconnectTolerance: 4,
+      captureTimeout: 60000,
 
       files: config.karma.files.split(',').map(filePath => {
         return process.env.PWD + path.sep + filePath;
@@ -55,11 +60,16 @@ const runKarma = function () {
         'dots',
         'progress',
         'coverage',
-        'remap-coverage'
+        'remap-coverage',
+        'junit'
       ], // report results in this format
 
       mochaReporter: {
         output: 'full'
+      },
+
+      junitReporter: {
+        outputDir: 'testResults/junitReporter'
       },
 
       plugins: [
@@ -69,7 +79,8 @@ const runKarma = function () {
         'karma-mocha-reporter',
         'karma-webpack',
         'karma-coverage',
-        'karma-remap-coverage'
+        'karma-remap-coverage',
+        'karma-junit-reporter'
       ],
 
       // coverageReporter: {
@@ -132,10 +143,9 @@ const runKarma = function () {
       // define where to save final remaped coverage reports
       remapCoverageReporter: {
         'text-summary': null,
-        html: './coverage/html'
+        html: './testResults/coverage/html',
+        cobertura: './testResults/coverage/cobertura.xml'
       },
-
-
 
       colors: true,
 
@@ -150,6 +160,11 @@ const runKarma = function () {
 
       port: config.karma.port
     };
+
+    if (config.karma.configFilePath) {
+      const userConfig = require(path.resolve(process.env.PWD, config.karma.configFilePath));
+      karmaConfig = userConfig(karmaConfig);
+    }
 
     return new Promise((resolve, reject) => {
       console.log(

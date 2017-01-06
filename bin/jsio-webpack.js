@@ -50,6 +50,11 @@ let arg = yargs
         description: 'Files to include in karma config, separated with ",".',
         type: 'string'
       })
+      .option('c', {
+        alias: 'config',
+        description: 'This should be a relative path to PWD for the karma.conf.js for this project',
+        type: 'string'
+      })
       .help('help');
     config.isKarma = true;
   })
@@ -65,6 +70,7 @@ config.watch = mainArgv.watch;
 if (config.isKarma) {
   config.karma.port = mainArgv.port;
   config.karma.files = mainArgv.files;
+  config.karma.configFilePath = mainArgv.config;
   const karmaIntegration = require('../src/karmaIntegration');
   karmaIntegration.runKarma();
 } else {
