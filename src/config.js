@@ -14,10 +14,16 @@ module.exports = {
     host: 'localhost',
     port: 8080
   },
+  // Karma
   isKarma: false,
   karma: {
     port: 9876,
     files: 'tests/index.js',
     preprocessorKeys: 'tests,src'
+  },
+  // postinstall libs
+  isInstallLibs: false,
+  installLibs: {
+    submodules: false
   }
 };

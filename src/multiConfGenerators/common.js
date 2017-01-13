@@ -1,5 +1,4 @@
 'use strict';
-const fs = require('fs');
 const path = require('path');
 
 const Promise = require('bluebird');
@@ -21,6 +20,8 @@ const Visualizer = require('webpack-visualizer-plugin');
 const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
 
 const config = require('../config');
+const utils = require('../utils');
+const installLibsUtils = require('../installLibs/utils');
 
 
 const log = debug('jsio-webpack:multiConf:common');
@@ -45,27 +46,27 @@ const resolveBabelPresets = (preset) => {
 };
 
 
-const _handleModule = (npmModule, aliases) => {
+const _handleModule = (modulePath, npmModule, aliases) => {
   return new Promise((resolve, reject) => {
     const _aliases = _.get(npmModule, 'jsioWebpack.alias');
     _.forEach(_aliases, (v, k) => {
       if (aliases[k]) {
         throw new Error(
-          'Alias collision: ' + k + ' (from ' + npmModule.path + ').' +
+          'Alias collision: ' + k + ' (from ' + (modulePath) + ').' +
           ' Existing alias: ' + aliases[k]
         );
       }
       log('Adding alias from ' + npmModule.name + ': ' + k + ' -> ' + v);
-      aliases[k] = path.join(npmModule.path, v);
+      aliases[k] = path.join(modulePath, v);
     });
-
 
     if (_.size(npmModule.dependencies) > 0) {
       resolve(Promise.map(
         Object.keys(npmModule.dependencies),
-        depKey => (
-          _handleModule(npmModule.dependencies[depKey], aliases)
-        ),
+        (depKey) => {
+          const dep = npmModule.dependencies[depKey];
+          return _handleModule(dep.path, dep, aliases)
+        },
         { concurrency: 1 }
       ));
       return;
@@ -80,21 +81,38 @@ const getModuleAliases = (projectDir) => {
   console.log('\n' + colors.green('Getting module aliases...') + '\n');
   const aliases = {};
   log('Loading npm');
-  return Promise.promisify(npm.load, npm)({})
-    .then((npm) => {
-      return new Promise((resolve, reject) => {
-        log('Running npm.list');
-        npm.list((stringList, res) => {
-          resolve(res);
-        });
+  return Promise.resolve().then(() => {
+    log('> Handle npm deps');
+    return Promise.promisify(npm.load, npm)({});
+  })
+  .then((npm) => {
+    return new Promise((resolve, reject) => {
+      log('Running npm.list');
+      npm.list((stringList, res) => {
+        resolve(res);
       });
     })
     .then((res) => {
-      return _handleModule(res, aliases);
-    })
-    .then(() => {
-      return aliases;
+      return _handleModule(res.path, res, aliases);
     });
+  })
+  .then(() => {
+    return installLibsUtils.getLibDirs(projectDir);
+  })
+  .then((libDirs) => {
+    log('> Handle lib dirs:', libDirs);
+    return Promise.map(libDirs, (libDir) => {
+      if (!libDir.package) {
+        log('> > package not found');
+        return;
+      }
+      return _handleModule(libDir.dir, libDir.package, aliases);
+    }, { concurrency: 1 });
+  })
+  .then(() => {
+    log('> aliases=', aliases);
+    return aliases;
+  });
 };
 
 
@@ -154,6 +172,10 @@ module.exports = (conf, options) => {
     if (options.backendBuild) {
       current.target = 'node';
       current.externals = [nodeExternals(options.nodeExternalsOpts)];
+      current.node = {
+        __dirname: false,
+        __filename: false
+      };
     }
 
     return current;
@@ -270,10 +292,10 @@ module.exports = (conf, options) => {
 
   if (
     (
-      options.useGitRevisionPlugin === 'production'
-      && process.env.NODE_ENV === 'production'
-    )
-    || (
+      options.useGitRevisionPlugin === 'production' &&
+      process.env.NODE_ENV === 'production'
+    ) ||
+    (
       options.useGitRevisionPlugin === 'always'
     )
   ) {

@@ -58,6 +58,17 @@ let arg = yargs
       .help('help');
     config.isKarma = true;
   })
+  .command('install-libs', '', (yargs2) => {
+    arg = yargs2
+      .option('s', {
+        alias: 'submodules',
+        description: 'Update (and init) submodules in the parent project before running npm install on lib directories.',
+        type: 'boolean',
+        default: config.installLibs.submodules
+      })
+      .help('help');
+    config.isInstallLibs = true;
+  })
   .help('help');
 const mainArgv = arg.argv;
 
@@ -68,12 +79,18 @@ config.watch = mainArgv.watch;
 
 
 if (config.isKarma) {
+  // Karma support
   config.karma.port = mainArgv.port;
   config.karma.files = mainArgv.files;
   config.karma.configFilePath = mainArgv.config;
   const karmaIntegration = require('../src/karmaIntegration');
   karmaIntegration.runKarma();
+} else if (config.isInstallLibs) {
+  config.installLibs.submodules = mainArgv.submodules;
+  const installLibs = require('../src/installLibs');
+  installLibs.run();
 } else {
+  // Normal
   config.serve.useHMR = mainArgv.hot;
   config.serve.port = mainArgv.port;
   const builder = require('../src/builder');
