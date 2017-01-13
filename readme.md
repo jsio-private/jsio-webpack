@@ -18,7 +18,8 @@ This is an example of what your `package.json` should contain (in relation to js
   "scripts": {
     "build": "NODE_ENV=production jsio-webpack",
     "watch": "jsio-webpack --watch",
-    "serve": "jsio-webpack serve --hot"
+    "serve": "jsio-webpack serve --hot",
+    "postinstall": "jsio-webpack install-libs --submodules"
   },
   "devDependencies": {
     "jsio-webpack": "git+https://github.com/jsio-private/jsio-webpack"
@@ -186,3 +187,9 @@ All other builds the constant will contain `'<DISABLED>'`.
 #### `useVisualizerPlugin`
 
 Will output a `stats.html` in your project directory, using [webpack-visualizer-plugin](https://www.npmjs.com/package/webpack-visualizer-plugin);
+
+
+
+### Subcommand: `install-libs`
+
+This will run `npm install` in all `lib/*` directories, if the directory has a `package.json`.  If your libs are git submodules, add the `--submodules` option to update and init submodules in your project first.
