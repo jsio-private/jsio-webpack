@@ -41,10 +41,10 @@ const run = function () {
       throw new Error(ERRORS.GIT_DIRTY);
     })
     .then(() => {
-      return utils.runChildProcess('git', ['submodule', 'update', '--init'], { cwd: projectDir })
+      return utils.runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd: projectDir });
     })
     .then(() => {
-      return utils.runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd: projectDir });
+      return utils.runChildProcess('git', ['submodule', 'update', '--init'], { cwd: projectDir });
     });
   })
   .then(() => {
@@ -67,6 +67,11 @@ const run = function () {
   })
   .then(() => {
     console.log('\n' + chalk.green('installLibs complete!') + '\n');
+  })
+  .catch((err) => {
+    console.error(chalk.red('Error while installing libs:'));
+    console.error(err.stack);
+    process.exit(1);
   });
 };
 
