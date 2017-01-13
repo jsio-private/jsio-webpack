@@ -80,6 +80,7 @@
     "extends": "jsio"
   },
   "devDependencies": {
+    "@types/debug": "0.0.29",
     "@types/fs-extra": "0.0.36",
     "@types/karma-coverage": "^0.5.30",
     "@types/mocha": "^2.2.35",

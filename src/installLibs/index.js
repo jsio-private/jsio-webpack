@@ -15,8 +15,7 @@ const log = debug('jsio-webpack:installLibs');
 
 const ERRORS = {
   MISSING_LIB_DIR: 'MISSING_LIB_DIR',
-  LIB_IS_DIRTY: 'LIB_IS_DIRTY',
-  GIT_DIRTY: 'GIT_DIRTY'
+  LIB_IS_DIRTY: 'LIB_IS_DIRTY'
 };
 
 
@@ -38,7 +37,6 @@ const run = function () {
     return utils.runChildProcess('git', ['diff', '--quiet', 'HEAD'], { cwd: projectDir })
     .catch((result) => {
       console.error(chalk.yellow(`Changes detected in git project: ${projectDir}`));
-      throw new Error(ERRORS.GIT_DIRTY);
     })
     .then(() => {
       return utils.runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd: projectDir });
