@@ -19,6 +19,8 @@ class MultiConf {
       useCircularDependencyPlugin: false,
       useModuleAliases: false,
       useNotifications: false,
+      useJsonSchema: false,
+      useShaders: false,
       es2015: 'default',
       useGitRevisionPlugin: 'never',
       useVisualizerPlugin: false,

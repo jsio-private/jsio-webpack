@@ -116,19 +116,14 @@ const getModuleAliases = (projectDir) => {
 };
 
 
+
 module.exports = (conf, options) => {
   const pwd = path.resolve(process.cwd());
+  const resolveExtensions = [''];
 
   // BASE CONFIG
   conf.merge((current) => {
     current.resolve = current.resolve || {};
-    current.resolve.extensions = [
-      '', '.webpack.js', '.web.js',
-      '.ts', '.tsx',
-      '.js', '.jsx',
-      '.vert', '.frag', '.glsl',
-      '.schema.json'
-    ];
     const nodeModulesPath = path.resolve(__dirname, '..', '..', 'node_modules');
     current.resolve.fallback = nodeModulesPath;
     current.resolveLoader = current.resolveLoader || {};
@@ -192,10 +187,13 @@ module.exports = (conf, options) => {
   // conf.preLoader('tslint', {})
 
   // LOADERS
-  conf.loader('json-schema', {
-    test: /\.schema\.json$/,
-    loaders: ['json-schema-loader?useSource=true', 'webpack-comment-remover-loader']
-  });
+  if (options.useJsonSchema) {
+    resolveExtensions.push('.schema.json');
+    conf.loader('json-schema', {
+      test: /\.schema\.json$/,
+      loaders: ['json-schema-loader?useSource=true', 'webpack-comment-remover-loader']
+    });
+  }
 
   // Note: this throws weird errors sometimes.  First thing to try if it
   // fails to parse your file: `import x from '!json!x';`
@@ -236,6 +234,8 @@ module.exports = (conf, options) => {
     plugins: resolvedBabelPlugins
   });
 
+  resolveExtensions.push('.ts');
+  resolveExtensions.push('.tsx');
   conf.loader('ts', {
     test: /\.tsx?$/,
     exclude: /node_modules/,
@@ -249,6 +249,8 @@ module.exports = (conf, options) => {
     ]
   });
 
+  resolveExtensions.push('.js');
+  resolveExtensions.push('.jsx');
   conf.loader('babel', {
     test: /\.jsx?$/,
     // include: path.join(__dirname, 'src'),
@@ -263,10 +265,16 @@ module.exports = (conf, options) => {
   conf.loader('file', {
     test: /\.(jpe?g|gif|png|wav|mp3|ogv|ogg|mp4|webm)$/
   });
-  conf.loader('glsl', {
-    test: /\.(glsl|vert|frag)$/,
-    loader: 'glsl-template-loader'
-  });
+
+  if (options.useShaders) {
+    resolveExtensions.push('.vert');
+    resolveExtensions.push('.frag');
+    resolveExtensions.push('.glsl');
+    conf.loader('glsl', {
+      test: /\.(glsl|vert|frag)$/,
+      loader: 'glsl-template-loader'
+    });
+  }
 
   if (options.useBase64FontLoader) {
     conf.loader('base64Fonts', {
@@ -365,6 +373,11 @@ module.exports = (conf, options) => {
       encryptionKey: encryptionKey
     }]);
   }
+
+  conf.merge((current) => {
+    current.resolve.extensions = resolveExtensions;
+    return current;
+  });
 
   // TODO: Better promise support -- this whole function should be in a promise
   // for proper error propagation

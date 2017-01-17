@@ -189,6 +189,20 @@ All other builds the constant will contain `'<DISABLED>'`.
 Will output a `stats.html` in your project directory, using [webpack-visualizer-plugin](https://www.npmjs.com/package/webpack-visualizer-plugin);
 
 
+#### `useJsonSchema`
+
+Adds resolve extensions: `.schema.json`
+Adds loader: `json-schema`
+
+Json schema files can contain comments.
+
+
+#### `useShaders`
+
+Adds resolve extensions: `.vert`, `.frag`, `.glsl`
+Adds loader: `glsl`
+
+
 
 ### Subcommand: `install-libs`
 
