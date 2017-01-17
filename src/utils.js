@@ -22,10 +22,10 @@ const runChildProcess = function (cmd, args, options) {
     const childProcess = promise.childProcess;
     console.log(prefix, chalk.gray(`childProcess.pid= ${childProcess.pid}`));
     childProcess.stdout.on('data', (data) => {
-      console.log(prefix, chalk.bgBlack('stdout'), data.toString());
+      console.log(prefix, chalk.bgBlack('stdout'), data.toString().trim());
     });
     childProcess.stderr.on('data', (data) => {
-      console.log(prefix, chalk.bgRed('stderr'), data.toString());
+      console.log(prefix, chalk.bgRed('stderr'), data.toString().trim());
     });
     return Promise.resolve(promise).tap(() => {
       console.log(prefix, chalk.gray(`childProcess ${childProcess.pid} exited`));
