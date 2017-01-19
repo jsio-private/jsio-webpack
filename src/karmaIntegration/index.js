@@ -5,8 +5,8 @@ const path = require('path');
 const _ = require('lodash');
 const Server = require('karma').Server;
 
-const builder = require('./builder');
-const config = require('./config');
+const builder = require('../builder');
+const config = require('../config');
 
 
 const runKarma = function () {
@@ -29,6 +29,7 @@ const runKarma = function () {
   return builder.getWebpackConfig()
   .then((webpackConfig) => {
     const webpackConfigForKarma = _.cloneDeep(webpackConfig[0]);
+    console.log('(stripping webpack config entry, not required for karma)');
     // Remove entry because we dont need
     delete webpackConfigForKarma.entry;
     delete webpackConfigForKarma.output;
