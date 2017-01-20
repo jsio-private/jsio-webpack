@@ -11,7 +11,6 @@ const config = require('../config');
 
 const runKarma = function () {
   // First we need to generate a webpack config for this build
-  const preprocessorKey = process.env.PWD + '/**/*.*';
   const preprocessorKeys = {};
   config.karma.preprocessorKeys.split(',').forEach(preprocessorKey => {
     let key;
@@ -21,7 +20,7 @@ const runKarma = function () {
       key = process.env.PWD + '/**/*.*';
     }
     preprocessorKeys[key] = [
-      'webpack',
+      // 'webpack',
       'coverage'
     ];
   });

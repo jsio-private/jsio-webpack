@@ -18,8 +18,11 @@ module.exports = {
   isKarma: false,
   karma: {
     port: 9876,
-    files: 'tests/index.js',
-    preprocessorKeys: 'tests,src'
+    // TODO: one day we should require the file directly
+    files: 'dist/tests.js',
+    preprocessorKeys: ''
+    // files: 'tests/index.js',
+    // preprocessorKeys: 'tests,src'
   },
   // postinstall libs
   isInstallLibs: false,
