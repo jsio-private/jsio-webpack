@@ -120,7 +120,10 @@ Lets modules define their own aliases.  Modules need to have a `package.json`, a
   "jsioWebpack": {
     "alias": {
       "libName": "src"
-    }
+    },
+    "envWhitelist": [
+      "MY_CONF"
+    ]
   }
 }
 ```
@@ -202,6 +205,10 @@ Json schema files can contain comments.
 Adds resolve extensions: `.vert`, `.frag`, `.glsl`
 Adds loader: `glsl`
 
+
+#### `envWhitelist`
+
+This is a list of strings, the strings are environment variables (`process.env.____`) to inject in to the build (using webpacks DefinePlugin).
 
 
 ### Subcommand: `install-libs`

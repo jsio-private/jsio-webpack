@@ -20,7 +20,6 @@ const Visualizer = require('webpack-visualizer-plugin');
 const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
 
 const config = require('../config');
-const utils = require('../utils');
 const installLibsUtils = require('../installLibs/utils');
 
 
@@ -46,40 +45,72 @@ const resolveBabelPresets = (preset) => {
 };
 
 
-const _handleModule = (modulePath, npmModule, aliases) => {
-  return new Promise((resolve, reject) => {
+const _handleModule = (modulePath, npmModule, moduleOpts) => {
+  log('handleModule:', modulePath);
+  return Promise.resolve().then((resolve, reject) => {
     const _aliases = _.get(npmModule, 'jsioWebpack.alias');
     _.forEach(_aliases, (v, k) => {
-      if (aliases[k]) {
+      if (moduleOpts.aliases[k]) {
         throw new Error(
           'Alias collision: ' + k + ' (from ' + (modulePath) + ').' +
-          ' Existing alias: ' + aliases[k]
+          ' Existing alias: ' + moduleOpts.aliases[k]
         );
       }
-      log('Adding alias from ' + npmModule.name + ': ' + k + ' -> ' + v);
-      aliases[k] = path.join(modulePath, v);
+      log(`Adding alias from ${npmModule.name}: ${k} -> ${v}`);
+      moduleOpts.aliases[k] = path.join(modulePath, v);
     });
 
-    if (_.size(npmModule.dependencies) > 0) {
-      resolve(Promise.map(
-        Object.keys(npmModule.dependencies),
-        (depKey) => {
-          const dep = npmModule.dependencies[depKey];
-          return _handleModule(dep.path, dep, aliases)
-        },
-        { concurrency: 1 }
-      ));
-      return;
+    const _envWhitelist = _.get(npmModule, 'jsioWebpack.envWhitelist');
+    if (_envWhitelist) {
+      log(`Adding envWhitelist from ${npmModule.name}: -> ${_envWhitelist}`);
+      moduleOpts.envWhitelist = _.uniq(moduleOpts.envWhitelist.concat(_envWhitelist));
     }
 
-    resolve();
+    // Handle nested module dependencies
+    if (_.size(npmModule.dependencies) === 0) {
+      return;
+    }
+    return Promise.map(
+      Object.keys(npmModule.dependencies),
+      (depKey) => {
+        const dep = npmModule.dependencies[depKey];
+        if (!dep.path) {
+          log('> > Skipping dep:', dep);
+          return;
+        }
+        return _handleModule(dep.path, dep, moduleOpts)
+      },
+      { concurrency: 1 }
+    );
+  })
+  .then(() => {
+    // Handle nested libs
+    return Promise.resolve().then(() => {
+      return installLibsUtils.getLibDirs(modulePath);
+    })
+    .then((libDirs) => {
+      log('> Handle lib dirs:', libDirs);
+      if (_.size(libDirs) === 0) {
+        return;
+      }
+      return Promise.map(libDirs, (libDir) => {
+        if (!libDir.package) {
+          log('> > package not found');
+          return;
+        }
+        return _handleModule(libDir.dir, libDir.package, moduleOpts);
+      }, { concurrency: 1 });
+    });
   });
 };
 
 
-const getModuleAliases = (projectDir) => {
+const getModuleOpts = (projectDir) => {
   console.log('\n' + colors.green('Getting module aliases...') + '\n');
-  const aliases = {};
+  const moduleOpts = {
+    aliases: {},
+    envWhitelist: []
+  };
   log('Loading npm');
   return Promise.resolve().then(() => {
     log('> Handle npm deps');
@@ -93,25 +124,12 @@ const getModuleAliases = (projectDir) => {
       });
     })
     .then((res) => {
-      return _handleModule(res.path, res, aliases);
+      return _handleModule(res.path, res, moduleOpts);
     });
   })
   .then(() => {
-    return installLibsUtils.getLibDirs(projectDir);
-  })
-  .then((libDirs) => {
-    log('> Handle lib dirs:', libDirs);
-    return Promise.map(libDirs, (libDir) => {
-      if (!libDir.package) {
-        log('> > package not found');
-        return;
-      }
-      return _handleModule(libDir.dir, libDir.package, aliases);
-    }, { concurrency: 1 });
-  })
-  .then(() => {
-    log('> aliases=', aliases);
-    return aliases;
+    log('> moduleOpts=', moduleOpts);
+    return moduleOpts;
   });
 };
 
@@ -294,8 +312,8 @@ module.exports = (conf, options) => {
 
   // PLUGINS
   const defines = {
-    'process.env.NODE_ENV': config.env,
-    'process.env.COMMITHASH': '<DISABLED>'
+    NODE_ENV: config.env,
+    COMMITHASH: '<DISABLED>'
   };
 
   if (
@@ -308,12 +326,8 @@ module.exports = (conf, options) => {
     )
   ) {
     const gitRevisionPlugin = new GitRevisionPlugin();
-    defines['process.env.COMMITHASH'] = gitRevisionPlugin.commithash();
+    defines.COMMITHASH = gitRevisionPlugin.commithash();
   }
-
-  conf.plugin('webpackDefine', webpack.DefinePlugin, [
-    _.mapValues(defines, v => JSON.stringify(v))
-  ]);
 
   conf.plugin('progressBar', ProgressBarPlugin, [{
     renderThrottle: 100,
@@ -384,14 +398,24 @@ module.exports = (conf, options) => {
   return new Promise((resolve, reject) => {
     // module aliases
     if (options.useModuleAliases) {
-      return getModuleAliases(pwd)
-        .then((aliases) => {
-          log('Found aliases:', aliases);
+      return getModuleOpts(pwd)
+        .then((moduleOpts) => {
+          log('Found module opts:', moduleOpts);
           conf.merge({
             resolve: {
-              alias: aliases
+              alias: moduleOpts.aliases
             }
           });
+
+          const envWhitelist = _.uniq(options.envWhitelist.concat(moduleOpts.envWhitelist));
+          _.forEach(envWhitelist, (k) => {
+            defines[k] = process.env[k] || '';
+          });
+
+          conf.plugin('webpackDefine', webpack.DefinePlugin, [{
+            'process.env': _.mapValues(defines, v => JSON.stringify(v))
+          }]);
+
           return conf;
         })
         .then(() => {

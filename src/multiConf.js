@@ -34,7 +34,8 @@ class MultiConf {
       ],
       nodeExternalsOpts: {
         modulesFromFile: true
-      }
+      },
+      envWhitelist: []
     };
   }
 

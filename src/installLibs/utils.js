@@ -14,8 +14,8 @@ const getLibDirs = function (
   projectDir
 ) {
   return Promise.resolve().then(() => {
+    log('> getLibDirs:', projectDir);
     const libDir = path.join(projectDir, 'lib');
-    log('> getLibDirs:', libDir);
     if (!fs.existsSync(libDir)) {
       return [];
     }
