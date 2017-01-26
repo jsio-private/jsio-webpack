@@ -395,6 +395,7 @@ module.exports = (conf, options) => {
 
   // TODO: Better promise support -- this whole function should be in a promise
   // for proper error propagation
+  let envWhitelist;
   return new Promise((resolve, reject) => {
     // module aliases
     if (options.useModuleAliases) {
@@ -407,22 +408,31 @@ module.exports = (conf, options) => {
             }
           });
 
-          const envWhitelist = _.uniq(options.envWhitelist.concat(moduleOpts.envWhitelist));
-          _.forEach(envWhitelist, (k) => {
-            defines[k] = process.env[k] || '';
-          });
-
-          conf.plugin('webpackDefine', webpack.DefinePlugin, [{
-            'process.env': _.mapValues(defines, v => JSON.stringify(v))
-          }]);
-
-          return conf;
+          envWhitelist = _.uniq(options.envWhitelist.concat(moduleOpts.envWhitelist));
         })
         .then(() => {
           resolve();
         });
     } else {
+      envWhitelist = _.uniq(options.envWhitelist);
       resolve();
     }
+  })
+  .then(() => {
+    // Define plugin
+    _.forEach(envWhitelist, (k) => {
+      defines[k] = process.env[k] || '';
+    });
+
+    let defineOpts = {};
+    if (options.flatProcessEnv) {
+      _.forEach(defines, (v, k) => {
+        defineOpts['process.env.' + k] = JSON.stringify(v);
+      });
+    } else {
+      defineOpts['process.env'] = _.mapValues(defines, v => JSON.stringify(v));
+    }
+
+    conf.plugin('webpackDefine', webpack.DefinePlugin, [defineOpts]);
   });
 };
