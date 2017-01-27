@@ -1,6 +1,7 @@
 'use strict';
 const path = require('path');
 
+const fs = require('fs-extra');
 const Promise = require('bluebird');
 const colors = require('colors');
 const nib = require('nib');
@@ -47,7 +48,7 @@ const resolveBabelPresets = (preset) => {
 
 const _handleModule = (modulePath, npmModule, moduleOpts) => {
   log('handleModule:', modulePath);
-  return Promise.resolve().then((resolve, reject) => {
+  return Promise.resolve().then(() => {
     const _aliases = _.get(npmModule, 'jsioWebpack.alias');
     _.forEach(_aliases, (v, k) => {
       if (moduleOpts.aliases[k]) {
@@ -74,11 +75,20 @@ const _handleModule = (modulePath, npmModule, moduleOpts) => {
       Object.keys(npmModule.dependencies),
       (depKey) => {
         const dep = npmModule.dependencies[depKey];
-        if (!dep.path) {
-          log('> > Skipping dep:', dep);
+        let depPath;
+        if (dep.path) {
+          depPath = dep.path;
+        } else {
+          log('> > Inferring dep path');
+          depPath = path.join(modulePath, 'node_modules', depKey);
+        }
+        const depPackagePath = path.join(depPath, 'package.json');
+        if (!fs.existsSync(depPackagePath)) {
+          log('> > package not found, skipping:', depPackagePath);
           return;
         }
-        return _handleModule(dep.path, dep, moduleOpts)
+        const depPackage = fs.readJsonSync(depPackagePath);
+        return _handleModule(depPath, depPackage, moduleOpts)
       },
       { concurrency: 1 }
     );
@@ -395,33 +405,35 @@ module.exports = (conf, options) => {
 
   // TODO: Better promise support -- this whole function should be in a promise
   // for proper error propagation
-  let envWhitelist;
+  let envWhitelist = {};
   return new Promise((resolve, reject) => {
+    addTowhitelist(envWhitelist, options.envWhitelist);
     // module aliases
-    if (options.useModuleAliases) {
+    if (options.scanLibs) {
       return getModuleOpts(pwd)
         .then((moduleOpts) => {
           log('Found module opts:', moduleOpts);
-          conf.merge({
-            resolve: {
-              alias: moduleOpts.aliases
-            }
-          });
+          if (options.useModuleAliases) {
+            conf.merge({
+              resolve: {
+                alias: moduleOpts.aliases
+              }
+            });
+          }
 
-          envWhitelist = _.uniq(options.envWhitelist.concat(moduleOpts.envWhitelist));
+          addTowhitelist(envWhitelist, moduleOpts.envWhitelist);
         })
         .then(() => {
           resolve();
         });
     } else {
-      envWhitelist = _.uniq(options.envWhitelist);
       resolve();
     }
   })
   .then(() => {
     // Define plugin
-    _.forEach(envWhitelist, (k) => {
-      defines[k] = process.env[k] || '';
+    _.forEach(envWhitelist, (v, k) => {
+      defines[k] = v ? '' + v : '';
     });
 
     let defineOpts = {};
@@ -432,7 +444,31 @@ module.exports = (conf, options) => {
     } else {
       defineOpts['process.env'] = _.mapValues(defines, v => JSON.stringify(v));
     }
-
     conf.plugin('webpackDefine', webpack.DefinePlugin, [defineOpts]);
   });
 };
+
+
+/** Merges `envWhitelist`s */
+const addTowhitelist = function (
+  envWhitelistMain,
+  envWhitelist
+) {
+  log('addTowhitelist', envWhitelist);
+  if (Array.isArray(envWhitelist)) {
+    // Add array
+    _.forEach(envWhitelist, (envVar, i) => {
+      if (typeof envVar === 'string') {
+        envWhitelistMain[envVar] = process.env[envVar];
+      } else {
+        // Objects in array?!
+        addTowhitelist(envWhitelistMain, envVar);
+      }
+    });
+  } else {
+    // Add object (with defaults)
+    _.forEach(envWhitelist, (defaultValue, envVar) => {
+      envWhitelistMain[envVar] = '' + _.get(process.env, envVar, defaultValue);
+    });
+  }
+}

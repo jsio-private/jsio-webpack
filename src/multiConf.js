@@ -17,7 +17,6 @@ class MultiConf {
       useReactHot: false,
       backendBuild: false,
       useCircularDependencyPlugin: false,
-      useModuleAliases: false,
       useNotifications: false,
       useJsonSchema: false,
       useShaders: false,
@@ -35,7 +34,10 @@ class MultiConf {
       nodeExternalsOpts: {
         modulesFromFile: true
       },
-      envWhitelist: []
+      scanLibs: false,
+      useModuleAliases: false,
+      envWhitelist: [],
+      flatProcessEnv: true
     };
   }
 

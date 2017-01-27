@@ -111,26 +111,6 @@ Make sure to install [source-map-support](https://github.com/evanw/node-source-m
 Turns on [CircularDependencyPlugin](https://github.com/aackerman/circular-dependency-plugin).  Default behavior is to not fail on circular dependencies.
 
 
-#### `useModuleAliases`
-
-Lets modules define their own aliases.  Modules need to have a `package.json`, and need to follow this format:
-
-```json
-{
-  "jsioWebpack": {
-    "alias": {
-      "libName": "src"
-    },
-    "envWhitelist": [
-      "MY_CONF"
-    ]
-  }
-}
-```
-
-All dependencies will be checked (specified in `package.json`).  The directory `lib` will also be checked for packages.
-
-
 #### `useNotifications`
 
 Will enable the [webpack-error-notification](https://www.npmjs.com/package/webpack-error-notification) plugin, which will create system notifications when the build status changes.
@@ -206,9 +186,60 @@ Adds resolve extensions: `.vert`, `.frag`, `.glsl`
 Adds loader: `glsl`
 
 
+#### `scanLibs`
+
+Required for:
+
+- `useModuleAliases`
+- `envWhitelist`
+
+
+#### `useModuleAliases`
+
+Lets modules define their own aliases.  Modules need to have a `package.json`, and need to follow this format:
+
+```json
+{
+  "jsioWebpack": {
+    "alias": {
+      "libName": "src"
+    }
+  }
+}
+```
+
+All dependencies will be checked (specified in `package.json`).  The directory `lib` will also be checked for packages.
+
+
 #### `envWhitelist`
 
+Default: `[]`
 This is a list of strings, the strings are environment variables (`process.env.____`) to inject in to the build (using webpacks DefinePlugin).
+
+```json
+{
+  "jsioWebpack": {
+    "envWhitelist": [
+      "MY_CONF"
+    ]
+  }
+}
+```
+
+Or
+
+```json
+// Or
+"envWhitelist": {
+  "MY_CONF": "defaultValue"
+}
+```
+
+
+#### `flatProcessEnv`
+
+Default: `true`
+Default behavior is to send whitelisted env vars as `'process.env.MY_VAR': '123'`, set to false to send `'process.env': {'MY_VAR': '123}`.
 
 
 ### Subcommand: `install-libs`
