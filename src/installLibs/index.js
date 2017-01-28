@@ -19,6 +19,42 @@ const ERRORS = {
 };
 
 
+const updateGitSubmodules = function (
+  cwd
+) {
+  console.log('\nUpdating git submodules...\n');
+  return Promise.resolve().then(() => {
+    return utils.runChildProcess('git', ['diff', '--quiet', 'HEAD'], { cwd })
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      if (err.code === 129) {
+        console.warn('> Not a git project');
+        return false;
+      }
+
+      if (err.code === 1) {
+        console.error(chalk.yellow(`Changes detected in git project: ${cwd}`));
+        return true;
+      }
+
+      throw new Error(`Unexpected return code: ${err.code}`);
+    });
+  })
+  .then((updateSubmodules) => {
+    if (!updateSubmodules) {
+      return;
+    }
+
+    return utils.runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd })
+    .then(() => {
+      return utils.runChildProcess('git', ['submodule', 'update', '--init'], { cwd });
+    });
+  });
+};
+
+
 const run = function () {
   let projectDir;
   return Promise.resolve().then(() => {
@@ -32,18 +68,7 @@ const run = function () {
     if (!config.installLibs.submodules) {
       return;
     }
-    console.log('\nUpdating git submodules...\n');
-    // Check for changes
-    return utils.runChildProcess('git', ['diff', '--quiet', 'HEAD'], { cwd: projectDir })
-    .catch((result) => {
-      console.error(chalk.yellow(`Changes detected in git project: ${projectDir}`));
-    })
-    .then(() => {
-      return utils.runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd: projectDir });
-    })
-    .then(() => {
-      return utils.runChildProcess('git', ['submodule', 'update', '--init'], { cwd: projectDir });
-    });
+    return updateGitSubmodules(projectDir);
   })
   .then(() => {
     // Find all libs (a fn exists somewhere...)
