@@ -194,7 +194,10 @@ module.exports = (conf, options) => {
 
     if (options.backendBuild) {
       current.target = 'node';
-      current.externals = [nodeExternals(options.nodeExternalsOpts)];
+      if (!current.externals) {
+        current.externals = [];
+      }
+      current.externals.push(nodeExternals(options.nodeExternalsOpts));
       current.node = {
         __dirname: false,
         __filename: false
