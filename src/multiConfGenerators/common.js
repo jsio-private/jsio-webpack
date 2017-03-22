@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const querystring = require('querystring');
 
 const fs = require('fs-extra');
 const Promise = require('bluebird');
@@ -235,9 +236,17 @@ module.exports = (conf, options) => {
     loaders: ['json-loader', 'webpack-comment-remover-loader']
   });
 
+
+  const ifdefOpts = _.merge({}, options.ifdefOpts);
+  const ifdefLoaderString = 'ifdef-loader?' + querystring.encode({ json: JSON.stringify(ifdefOpts) });
+
+
   conf.loader('worker', {
     test: /\.worker\.js$/,
-    loader: 'worker-loader?inline=true'
+    loaders: [
+      'worker-loader?inline=true',
+      ifdefLoaderString
+    ]
   });
 
   const babelPresets = [];
@@ -276,7 +285,8 @@ module.exports = (conf, options) => {
       'ts-loader?' + JSON.stringify({
         visualStudioErrorFormat: true,
         ignoreDiagnostics: options.typescriptIgnoreDiagnostics
-      })
+      }),
+      ifdefLoaderString
     ]
   });
 
@@ -286,7 +296,10 @@ module.exports = (conf, options) => {
     test: /\.jsx?$/,
     // include: path.join(__dirname, 'src'),
     exclude: /(node_modules)/,
-    loaders: [babelLoaderString]
+    loaders: [
+      babelLoaderString,
+      ifdefLoaderString
+    ]
   });
 
   conf.loader('xml', {

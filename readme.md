@@ -245,3 +245,19 @@ Default behavior is to send whitelisted env vars as `'process.env.MY_VAR': '123'
 ### Subcommand: `install-libs`
 
 This will run `npm install` in all `lib/*` directories, if the directory has a `package.json`.  If your libs are git submodules, add the `--submodules` option to update and init submodules in your project first.
+
+
+#### `ifdefOpts`
+
+Adds loader: `ifdef-loader`
+Default: `{}`
+
+Optionally include blocks of code at build time.  Is applied to `.js`, `.jsx`, `.ts`, `.tsx`, and `.worker.js` files.
+
+Example source code:
+
+```js
+/// #if MY_VAR
+console.log('MY_VAR is set')
+/// #endif
+```

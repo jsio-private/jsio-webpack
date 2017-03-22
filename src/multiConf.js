@@ -37,7 +37,8 @@ class MultiConf {
       scanLibs: false,
       useModuleAliases: false,
       envWhitelist: [],
-      flatProcessEnv: true
+      flatProcessEnv: true,
+      ifdefOpts: {}
     };
   }
 
