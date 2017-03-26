@@ -65,7 +65,12 @@ const _handleModule = (modulePath, npmModule, moduleOpts) => {
     const _envWhitelist = _.get(npmModule, 'jsioWebpack.envWhitelist');
     if (_envWhitelist) {
       log(`Adding envWhitelist from ${npmModule.name}: -> ${_envWhitelist}`);
-      moduleOpts.envWhitelist = _.uniq(moduleOpts.envWhitelist.concat(_envWhitelist));
+      _.forEach(_envWhitelist, (v, k) => {
+        if (moduleOpts.envWhitelist[k]) {
+          console.warn('Overwriting existing envWhitelist entry:', moduleOpts.envWhitelist[k]);
+        }
+        moduleOpts.envWhitelist[k] = v;
+      });
     }
 
     // Handle nested module dependencies
@@ -120,7 +125,7 @@ const getModuleOpts = (projectDir) => {
   console.log('\n' + colors.green('Getting module aliases...') + '\n');
   const moduleOpts = {
     aliases: {},
-    envWhitelist: []
+    envWhitelist: {}
   };
   log('Loading npm');
   return Promise.resolve().then(() => {
@@ -448,6 +453,7 @@ module.exports = (conf, options) => {
   })
   .then(() => {
     // Define plugin
+    log('envWhitelist=', envWhitelist);
     _.forEach(envWhitelist, (v, k) => {
       defines[k] = v ? '' + v : '';
     });
@@ -471,20 +477,28 @@ const addTowhitelist = function (
   envWhitelist
 ) {
   log('addTowhitelist', envWhitelist);
+  // Support older api where you can whitelist an array without default values
   if (Array.isArray(envWhitelist)) {
-    // Add array
-    _.forEach(envWhitelist, (envVar, i) => {
-      if (typeof envVar === 'string') {
-        envWhitelistMain[envVar] = process.env[envVar];
-      } else {
-        // Objects in array?!
-        addTowhitelist(envWhitelistMain, envVar);
-      }
+    const envWhitelistObject = {};
+    _.forEach(envWhitelist, (v, i) => {
+      envWhitelistObject[v] = '';
     });
-  } else {
-    // Add object (with defaults)
-    _.forEach(envWhitelist, (defaultValue, envVar) => {
-      envWhitelistMain[envVar] = '' + _.get(process.env, envVar, defaultValue);
-    });
+    addTowhitelist(envWhitelistMain, envWhitelistObject);
+    return;
   }
+
+  _.forEach(envWhitelist, (defaultValue, k) => {
+    if (envWhitelistMain[k]) {
+      console.log('Overwriting existing envWhitelistMain entry:', envWhitelistMain[k]);
+    }
+    if (process.env[k]) {
+      envWhitelistMain[k] = process.env[k];
+    } else {
+      if (typeof defaultValue === 'string') {
+        envWhitelistMain[k] = defaultValue;
+      } else {
+        envWhitelistMain[k] = defaultValue[process.env.NODE_ENV];
+      }
+    }
+  });
 }

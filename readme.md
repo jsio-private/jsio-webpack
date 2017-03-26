@@ -226,12 +226,22 @@ This is a list of strings, the strings are environment variables (`process.env._
 }
 ```
 
-Or
+Or using a default value
 
 ```json
-// Or
 "envWhitelist": {
   "MY_CONF": "defaultValue"
+}
+```
+
+Or using NODE_ENV to choose a default value
+
+```json
+"envWhitelist": {
+  "MY_CONF": {
+    "development": "devValue",
+    "production": "prodValue"
+  }
 }
 ```
 
