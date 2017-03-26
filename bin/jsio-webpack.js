@@ -4,6 +4,7 @@
 const yargs = require('yargs');
 
 const config = require('../src/config');
+const envLoader = require('../src/envLoader');
 
 
 let arg = yargs
@@ -12,6 +13,11 @@ let arg = yargs
     description: 'Enable verbose logging',
     default: false,
     type: 'boolean'
+  })
+  .option('env', {
+    description: 'Set NODE_ENV and load this env (if possible) from $PWD/envs/$NODE_ENV',
+    default: 'development',
+    type: 'string'
   })
   .option('w', {
     alias: 'watch',
@@ -76,6 +82,13 @@ const mainArgv = arg.argv;
 // Update config
 config.verbose = mainArgv.v;
 config.watch = mainArgv.watch;
+
+
+// Handle env
+if (mainArgv.env) {
+  config.env = mainArgv.env;
+}
+envLoader.loadEnv(config.env);
 
 
 if (config.isKarma) {
