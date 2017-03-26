@@ -28,5 +28,6 @@ module.exports = {
   isInstallLibs: false,
   installLibs: {
     submodules: false
-  }
+  },
+  enableChildProcess: false
 };

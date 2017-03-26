@@ -1,180 +1,82 @@
 'use strict';
-const fs = require('fs');
+const os = require('os');
 const path = require('path');
-const util = require('util');
+const childProcess = require('child_process');
 
 const Promise = require('bluebird');
-const webpack = require('webpack');
-const WebpackDevServer = require('webpack-dev-server');
-const _ = require('lodash');
+const chalk = require('chalk');
 
 const config = require('./config');
-const multiConf = require('./multiConf');
-const compilerLogger = require('./compilerLogger');
+const builderWebpackInterface = require('./builder/builderWebpackInterface');
 
 
-const getUserConfigs = (dir) => {
-  const userWebpackPath = path.resolve(dir, config.USER_CONFIG_NAME);
+const WORKER_PATH = path.resolve(__dirname, './builder/builderWorker.js');
 
-  if (!fs.existsSync(userWebpackPath)) {
-    throw new Error('Missing user webpack config: ' + userWebpackPath);
-  }
 
-  const userWebpackConfig = require(userWebpackPath);
-  if (Array.isArray(userWebpackConfig)) {
-    return userWebpackConfig;
-  } else {
-    return [userWebpackConfig];
-  }
+const printHeader = function (s) {
+  console.log('\n**** ****');
+  console.log(s);
+  console.log('**** ****\n');
 };
 
 
-const buildMultiConfs = (userConfigs) => {
-  return Promise.map(userConfigs, (userConfig) => {
-    const _multiConf = new multiConf.MultiConf();
-    _multiConf.userConfig = userConfig;
-
-    const userConfiguratorFn = userConfig.configure || userConfig;
-    const configs = [
-      userConfiguratorFn,
-      multiConf.getConfigFn('common')
-    ];
-
-    if (config.env === 'production') {
-      configs.push(multiConf.getConfigFn('production'));
-    }
-    if (config.isServer) {
-      configs.push(multiConf.getConfigFn('serve'));
-    } else if (config.watch) {
-      configs.push(multiConf.getConfigFn('watch'));
-    }
-
-    return Promise.map(configs, c => {
-      return _multiConf.append(c);
-    }, { concurrency: 1 }).then(() => {
-      return _multiConf;
+const runWorkerFor = function (name, webpackConfigIndex) {
+  return new Promise((resolve, reject) => {
+    const child = childProcess.fork(WORKER_PATH, [], {
+      silent: true
     });
-  }, { concurrency: 1 }).then(multiConfs => {
-    return Promise.map(multiConfs, (multiConf) => {
-      // Apply some stuff after
-      if (config.isServer) {
-        const webpackConfig = multiConf.configurator._config;
-        _.forEach(webpackConfig.entry, (v, k) => {
-          const newEntries = []
-          newEntries.push(`webpack-dev-server/client?http://${config.serve.host}:${config.serve.port}/`);
-          if (config.serve.useHMR) {
-            newEntries.push('webpack/hot/only-dev-server');
-          }
-          // Put the old one back
-          newEntries.push(v);
-          webpackConfig.entry[k] = newEntries;
-        });
-      }
-      return multiConf;
+    child.stdout.on('data', (data) => {
+      console.log(`${chalk.gray(name)} STDOUT:\t ${data}`);
     });
-  }).then(multiConfs => {
-    return Promise.map(multiConfs, (multiConf) => {
-      // Let the project customize the final config before generation
-      const postConfigureFn = multiConf.userConfig.postConfigure;
-      if (postConfigureFn) {
-        return multiConf.append(postConfigureFn).then(() => multiConf);
-      }
-
-      // Finalize
-      return multiConf;
+    child.stderr.on('data', (data) => {
+      console.log(`${chalk.gray(name)} ${chalk.red('STDERR')}:\t ${data}`);
     });
-  });
-};
-
-
-const printConfig = (title, data) => {
-  console.log(title);
-  console.log(util.inspect(data, { colors: true, depth: 5 }));
-  console.log('');
-};
-
-
-const getWebpackConfig = (userConfigs) => {
-  return (new Promise((resolve, reject) => {
-    if (!userConfigs) {
-      userConfigs = getUserConfigs(process.env.PWD);
-    } else {
-      if (!Array.isArray(userConfigs)) {
-        userConfigs = [userConfigs];
+    child.on('message', (data) => {
+      child.kill();
+      const error = data.error;
+      if (error) {
+        console.log(chalk.red('Child process error:'), name, error);
+        reject(error);
+      } else {
+        resolve();
       }
-    }
-    resolve(buildMultiConfs(userConfigs));
-  })).then(userDefinitions => {
-    const finalWebpackConfig = _.map(userDefinitions, mc => mc.resolve());
-    printConfig('Webpack Config:', finalWebpackConfig);
-    return finalWebpackConfig;
+    });
+    child.send({
+      webpackConfigIndex: webpackConfigIndex,
+      config: config
+    });
   });
 };
 
 
 const start = function (userConfigs, cb) {
-  return getWebpackConfig(userConfigs).then((finalWebpackConfig) => {
+  printHeader('Getting config');
+  return builderWebpackInterface.getWebpackConfig(userConfigs)
+  .then((finalWebpackConfig) => {
     console.log('\nBuilding...\n');
 
-    let compiler = webpack(finalWebpackConfig);
-
-    const onComplete = function () {
-      compilerLogger.apply(null, arguments);
-      cb && cb();
-    };
-
-    if (config.isServer) {
-      const mainConf = finalWebpackConfig[0];
-      const publicPath = (
-        mainConf &&
-        mainConf.output &&
-        mainConf.output.publicPath
-      );
-      if (!publicPath) {
-        throw new Error('First webpack config must specify output.publicPath');
-      }
-
-      const devServerOpts = {
-        // webpack-dev-server options
-        contentBase: process.env.PWD,
-        hot: config.serve.useHMR,
-        historyApiFallback: false,
-
-        // webpack-dev-middleware options
-        quiet: false,
-        noInfo: false,
-        lazy: false,
-        // watchOptions: {
-        //   aggregateTimeout: 300,
-        //   poll: 1000
-        // },
-        // It's a required option.
-        // FIXME: What happens if there is more than one chunk?
-        publicPath: publicPath,
-        stats: { colors: true }
-      };
-      printConfig('Dev Server Config:', devServerOpts);
-      const server = new WebpackDevServer(compiler, devServerOpts);
-
-      const listenHost = 'localhost';
-      const listenPort = config.serve.port;
-      console.log(`\n\nStarting server on http://${listenHost}:${listenPort}\n\n`);
-      server.listen(listenPort, listenHost, () => {
-        console.log('> Server ready');
-      });
-    } else if (config.watch) {
-      // const watcher =
-      compiler.watch({
-        aggregateTimeout: 300 // wait so long for more changes
-      }, onComplete);
-    } else {
-      compiler.run(onComplete);
+    if (Array.isArray(finalWebpackConfig) && config.enableChildProcess) {
+      const cores = os.cpus().length / 2;
+      printHeader(`Running compilers in multithreaded mode across ${cores} cores`);
+      return Promise.map(finalWebpackConfig, (webpackConfig, i) => {
+        return runWorkerFor(`thread_${i}`, i);
+      }, { concurrency: cores });
     }
+
+    printHeader('Running compiler');
+    return builderWebpackInterface.runCompiler(finalWebpackConfig);
+  })
+  .then(() => {
+    printHeader('Done');
+    cb && cb(null);
+  })
+  .catch((err) => {
+    cb && cb(err);
+    console.log(chalk.red('Error:'), err);
   });
 };
 
 
 module.exports = {
-  start: start,
-  getWebpackConfig: getWebpackConfig
+  start: start
 };
