@@ -19,6 +19,7 @@
     "child-process-promise": "^2.2.0",
     "circular-dependency-plugin": "^2.0.0",
     "css-loader": "^0.24.0",
+    "dsv-loader": "^2.0.0",
     "encrypted-build-webpack-plugin": "git+https://github.com/jsio-private/encrypted-build-webpack-plugin.git",
     "eslint": "^3.3.1",
     "eslint-config-jsio": "git+https://github.com/jsio-private/eslint-config-jsio.git",

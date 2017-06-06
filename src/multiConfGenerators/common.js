@@ -307,6 +307,11 @@ module.exports = (conf, options) => {
     ]
   });
 
+  conf.loader('dsv', {
+    test: /\.(csv)$/,
+    loader: 'dsv-loader'
+  });
+
   conf.loader('xml', {
     test: /\.(xml)$/
   });
