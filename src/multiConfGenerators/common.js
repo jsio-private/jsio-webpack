@@ -47,20 +47,22 @@ const resolveBabelPresets = (preset) => {
 };
 
 
-const _handleModule = (modulePath, npmModule, moduleOpts) => {
+const _handleModule = (options, modulePath, npmModule, moduleOpts) => {
   log('handleModule:', modulePath);
   return Promise.resolve().then(() => {
-    const _aliases = _.get(npmModule, 'jsioWebpack.alias');
-    _.forEach(_aliases, (v, k) => {
-      if (moduleOpts.aliases[k]) {
-        throw new Error(
-          'Alias collision: ' + k + ' (from ' + (modulePath) + ').' +
-          ' Existing alias: ' + moduleOpts.aliases[k]
-        );
-      }
-      log(`Adding alias from ${npmModule.name}: ${k} -> ${v}`);
-      moduleOpts.aliases[k] = path.join(modulePath, v);
-    });
+    if (options.useModuleAliases) {
+      const _aliases = _.get(npmModule, 'jsioWebpack.alias');
+      _.forEach(_aliases, (v, k) => {
+        if (moduleOpts.aliases[k]) {
+          throw new Error(
+            'Alias collision: ' + k + ' (from ' + (modulePath) + ').' +
+            ' Existing alias: ' + moduleOpts.aliases[k]
+          );
+        }
+        log(`Adding alias from ${npmModule.name}: ${k} -> ${v}`);
+        moduleOpts.aliases[k] = path.join(modulePath, v);
+      });
+    }
 
     const _envWhitelist = _.get(npmModule, 'jsioWebpack.envWhitelist');
     if (_envWhitelist) {
@@ -94,7 +96,7 @@ const _handleModule = (modulePath, npmModule, moduleOpts) => {
           return;
         }
         const depPackage = fs.readJsonSync(depPackagePath);
-        return _handleModule(depPath, depPackage, moduleOpts)
+        return _handleModule(options, depPath, depPackage, moduleOpts)
       },
       { concurrency: 1 }
     );
@@ -114,14 +116,14 @@ const _handleModule = (modulePath, npmModule, moduleOpts) => {
           log('> > package not found');
           return;
         }
-        return _handleModule(libDir.dir, libDir.package, moduleOpts);
+        return _handleModule(options, libDir.dir, libDir.package, moduleOpts);
       }, { concurrency: 1 });
     });
   });
 };
 
 
-const getModuleOpts = (projectDir) => {
+const getModuleOpts = (options, projectDir) => {
   console.log('\n' + colors.green('Getting module aliases...') + '\n');
   const moduleOpts = {
     aliases: {},
@@ -140,7 +142,7 @@ const getModuleOpts = (projectDir) => {
       });
     })
     .then((res) => {
-      return _handleModule(res.path, res, moduleOpts);
+      return _handleModule(options, res.path, res, moduleOpts);
     });
   })
   .then(() => {
@@ -436,7 +438,7 @@ module.exports = (conf, options) => {
     addTowhitelist(envWhitelist, options.envWhitelist);
     // module aliases
     if (options.scanLibs) {
-      return getModuleOpts(pwd)
+      return getModuleOpts(options, pwd)
         .then((moduleOpts) => {
           log('Found module opts:', moduleOpts);
           if (options.useModuleAliases) {
