@@ -70,7 +70,6 @@
     "ts-loader": "^2.2.1",
     "tslint": "^5.4.3",
     "typescript": "=2.3.4",
-    "universal-analytics": "^0.4.8",
     "url-loader": "^0.5.7",
     "webpack": "git+https://github.com/jsio-private/webpack#1.13.3-update-node-libs",
     "webpack-comment-remover-loader": "0.0.3",
@@ -93,7 +92,6 @@
     "@types/karma-coverage": "^0.5.30",
     "@types/mocha": "^2.2.35",
     "@types/node": "^8.0.6",
-    "@types/strip-json-comments": "0.0.28",
-    "@types/universal-analytics": "^0.3.27"
+    "@types/strip-json-comments": "0.0.28"
   }
 }
