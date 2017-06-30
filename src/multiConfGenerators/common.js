@@ -206,6 +206,15 @@ module.exports = (conf, options) => {
         current.externals = [];
       }
       current.externals.push(nodeExternals(options.nodeExternalsOpts));
+      // const importType = 'commonjs';
+      // current.externals.push(function (context, request, callback) {
+      //   const relativePath = path.relative(pwd, context);
+      //   if (relativePath.match(/^node_modules/)) {
+      //     console.log('Marking as external: context=', context, 'request=', request);
+      //     return callback(null, importType + ' ' + request);
+      //   }
+      //   callback();
+      // });
       current.node = {
         __dirname: false,
         __filename: false

@@ -32,7 +32,8 @@ class MultiConf {
         2307
       ],
       nodeExternalsOpts: {
-        modulesFromFile: true
+        modulesFromFile: true,
+        whitelist: []
       },
       scanLibs: false,
       useModuleAliases: false,
