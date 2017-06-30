@@ -8,6 +8,8 @@ const _ = require('lodash');
 const config = require('../config');
 const multiConf = require('../multiConf');
 
+import dynamicRequire from '../dynamicRequire';
+
 
 const getUserConfigs = (dir) => {
   const userWebpackPath = path.resolve(dir, config.USER_CONFIG_NAME);
@@ -16,7 +18,7 @@ const getUserConfigs = (dir) => {
     throw new Error('Missing user webpack config: ' + userWebpackPath);
   }
 
-  const userWebpackConfig = require(userWebpackPath);
+  const userWebpackConfig = dynamicRequire(userWebpackPath);
   if (Array.isArray(userWebpackConfig)) {
     return userWebpackConfig;
   } else {

@@ -24,6 +24,8 @@ const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
 const config = require('../config');
 const installLibsUtils = require('../installLibs/utils');
 
+import dynamicRequire from '../dynamicRequire';
+
 
 const log = debug('jsio-webpack:multiConf:common');
 
@@ -40,10 +42,10 @@ const isExternal = (module) => {
 
 const resolveBabelPresets = (preset) => {
   if (Array.isArray(preset)) {
-    preset[0] = require.resolve(preset[0]);
+    preset[0] = dynamicRequire.resolve(preset[0]);
     return preset;
   }
-  return require.resolve(preset);
+  return dynamicRequire.resolve(preset);
 };
 
 
