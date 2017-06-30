@@ -1,8 +1,8 @@
 {
-  "name": "jsio-webpack",
+  "name": "jsio-webpack-v0",
   "version": "0.0.1",
   "bin": {
-    "jsio-webpack": "./bin/jsio-webpack.js"
+    "jsio-webpack-v0": "./bin/jsio-webpack.js"
   },
   "main": "./src/index.js",
   "dependencies": {
