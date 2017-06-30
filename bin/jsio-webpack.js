@@ -3,8 +3,10 @@
 
 const yargs = require('yargs');
 
-const config = require('../src/config');
-const envLoader = require('../src/envLoader');
+const jsioWebpack = require('../dist/jsioWebpack');
+
+const config = jsioWebpack.config;
+const envLoader = jsioWebpack.envLoader;
 
 
 let arg = yargs
@@ -96,17 +98,17 @@ if (config.isKarma) {
   config.karma.port = mainArgv.port;
   config.karma.files = mainArgv.files;
   config.karma.configFilePath = mainArgv.config;
-  const karmaIntegration = require('../src/karmaIntegration');
+  const karmaIntegration = jsioWebpack.karmaIntegration;
   karmaIntegration.runKarma();
 } else if (config.isInstallLibs) {
   config.installLibs.submodules = mainArgv.submodules;
-  const installLibs = require('../src/installLibs');
+  const installLibs = jsioWebpack.installLibs;
   installLibs.run();
 } else {
   // Normal
   config.serve.useHMR = mainArgv.hot;
   config.serve.port = mainArgv.port;
-  const builder = require('../src/builder');
+  const builder = jsioWebpack.builder;
   // Start it up!
   builder.start();
 }

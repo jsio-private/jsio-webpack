@@ -1,10 +1,14 @@
 {
-  "name": "jsio-webpack-v0",
-  "version": "0.0.1",
+  "name": "jsio-webpack-v1",
+  "version": "1.0.0",
   "bin": {
-    "jsio-webpack-v0": "./bin/jsio-webpack.js"
+    "jsio-webpack-v1": "./bin/jsio-webpack.js"
   },
-  "main": "./src/index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "watch": "jsio-webpack-v0 --env development --watch"
+  },
+  "main": "./dist/jsioWebpack.js",
   "dependencies": {
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
@@ -36,6 +40,7 @@
     "html-webpack-plugin": "^2.22.0",
     "ifdef-loader": "^1.1.1",
     "istanbul-instrumenter-loader": "^1.2.0",
+    "jsio-webpack-v0": "git+https://github.com/jsio-private/jsio-webpack#v0",
     "json-loader": "^0.5.4",
     "json-schema-loader": "git+https://github.com/jsio-private/json-schema-loader",
     "karma": "^1.3.0",
