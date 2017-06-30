@@ -1,14 +1,18 @@
-'use strict';
-const util = require('util');
+import MultiConf from '../multiConf';
+import util from 'util';
 
-const _ = require('lodash');
-const Promise = require('bluebird');
-const webpack = require('webpack');
-const WebpackDevServer = require('webpack-dev-server');
+import debug from 'debug';
+import _ from 'lodash';
+import Promise from 'bluebird';
+import webpack from 'webpack';
+import WebpackDevServer from 'webpack-dev-server';
 
-const config = require('../config');
-const compilerLogger = require('../compilerLogger');
-const builderConfig = require('./builderConfig');
+import config from '../config';
+import compilerLogger from '../compilerLogger';
+import { buildMultiConfs, getUserConfigs, UserConfig } from './builderConfig';
+
+
+const log: Function = debug('jsio-webpack:builderWebpackInterface');
 
 
 const printConfig = (title, data) => {
@@ -18,32 +22,38 @@ const printConfig = (title, data) => {
 };
 
 
-const getWebpackConfig = (userConfigs) => {
-  return (new Promise((resolve, reject) => {
+export type WebpackConfig = {
+  output: {
+    publicPath: string;
+  };
+};
+
+
+export const getWebpackConfig = function(userConfigs: UserConfig[]): Promise<WebpackConfig[]> {
+  return new Promise<MultiConf[]>((resolve, reject) => {
     if (!userConfigs) {
-      userConfigs = builderConfig.getUserConfigs(process.env.PWD);
+      userConfigs = getUserConfigs(process.env.PWD);
     } else {
       if (!Array.isArray(userConfigs)) {
         userConfigs = [userConfigs];
       }
     }
-    resolve(builderConfig.buildMultiConfs(userConfigs));
-  })).then(userDefinitions => {
-    const finalWebpackConfig = _.map(userDefinitions, mc => mc.resolve());
+    resolve(buildMultiConfs(userConfigs));
+  })
+  .then((userDefinitions: MultiConf[]) => {
+    const finalWebpackConfig: WebpackConfig[] = userDefinitions.map((mc: MultiConf) => mc.resolve());
     printConfig('Webpack Config:', finalWebpackConfig);
     return finalWebpackConfig;
   });
 };
 
 
-/**
- * @returns Promise<>
- */
-const runCompiler = function (
-  finalWebpackConfig
-) {
-  return new Promise((resolve, reject) => {
-    let compiler = webpack(finalWebpackConfig);
+export const runCompiler = function(
+  finalWebpackConfig: WebpackConfig[]
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    log('runCompiler: finalWebpackConfig', finalWebpackConfig, 'config=', config);
+    const compiler = webpack(finalWebpackConfig);
 
     const onComplete = function () {
       compilerLogger.apply(null, arguments);
@@ -92,7 +102,7 @@ const runCompiler = function (
         console.log('> Server ready');
       });
     } else if (config.watch) {
-      // const watcher =
+      log('Starting watcher');
       compiler.watch({
         aggregateTimeout: 300 // wait so long for more changes
       }, onComplete);
@@ -100,10 +110,4 @@ const runCompiler = function (
       compiler.run(onComplete);
     }
   });
-};
-
-
-module.exports = {
-  getWebpackConfig: getWebpackConfig,
-  runCompiler: runCompiler
 };

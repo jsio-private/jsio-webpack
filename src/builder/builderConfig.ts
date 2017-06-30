@@ -1,17 +1,28 @@
 'use strict';
-const fs = require('fs');
-const path = require('path');
+import { WebpackConfig } from './builderWebpackInterface';
+import { default as MultiConf, getConfigFn, ConfigFunction } from '../multiConf';
+import fs from 'fs';
+import path from 'path';
 
-const Promise = require('bluebird');
-const _ = require('lodash');
+import Promise from 'bluebird';
+import _ from 'lodash';
 
-const config = require('../config');
-const multiConf = require('../multiConf');
+import config from '../config';
+import multiConf from '../multiConf';
 
 import dynamicRequire from '../dynamicRequire';
 
 
-const getUserConfigs = (dir) => {
+export type Configurator = {};
+
+
+export type UserConfig = {
+  configure: ConfigFunction;
+  postConfigure: ConfigFunction;
+};
+
+
+export const getUserConfigs = (dir: string): UserConfig[] => {
   const userWebpackPath = path.resolve(dir, config.USER_CONFIG_NAME);
 
   if (!fs.existsSync(userWebpackPath)) {
@@ -27,24 +38,23 @@ const getUserConfigs = (dir) => {
 };
 
 
-const buildMultiConfs = (userConfigs) => {
-  return Promise.map(userConfigs, (userConfig) => {
-    const _multiConf = new multiConf.MultiConf();
-    _multiConf.userConfig = userConfig;
+export const buildMultiConfs = function(userConfigs: UserConfig[]): Promise<MultiConf[]> {
+  return Promise.map(userConfigs, (userConfig: UserConfig) => {
+    const _multiConf = new MultiConf(userConfig);
 
     const userConfiguratorFn = userConfig.configure || userConfig;
     const configs = [
       userConfiguratorFn,
-      multiConf.getConfigFn('common')
+      getConfigFn('common')
     ];
 
     if (config.env === 'production') {
-      configs.push(multiConf.getConfigFn('production'));
+      configs.push(getConfigFn('production'));
     }
     if (config.isServer) {
-      configs.push(multiConf.getConfigFn('serve'));
+      configs.push(getConfigFn('serve'));
     } else if (config.watch) {
-      configs.push(multiConf.getConfigFn('watch'));
+      configs.push(getConfigFn('watch'));
     }
 
     return Promise.map(configs, c => {
@@ -70,8 +80,9 @@ const buildMultiConfs = (userConfigs) => {
       }
       return multiConf;
     });
-  }).then(multiConfs => {
-    return Promise.map(multiConfs, (multiConf) => {
+  })
+  .then((multiConfs: MultiConf[]) => {
+    return Promise.map(multiConfs, (multiConf: MultiConf) => {
       // Let the project customize the final config before generation
       const postConfigureFn = multiConf.userConfig.postConfigure;
       if (postConfigureFn) {
@@ -82,10 +93,4 @@ const buildMultiConfs = (userConfigs) => {
       return multiConf;
     });
   });
-};
-
-
-module.exports = {
-  getUserConfigs: getUserConfigs,
-  buildMultiConfs: buildMultiConfs
 };

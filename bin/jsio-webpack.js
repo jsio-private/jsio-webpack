@@ -108,7 +108,6 @@ if (config.isKarma) {
   // Normal
   config.serve.useHMR = mainArgv.hot;
   config.serve.port = mainArgv.port;
-  const builder = jsioWebpack.builder;
   // Start it up!
-  builder.start();
+  jsioWebpack.build();
 }

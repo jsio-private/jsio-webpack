@@ -1,27 +1,28 @@
 'use strict';
-const os = require('os');
-const path = require('path');
-const childProcess = require('child_process');
+import { UserConfig } from './builder/builderConfig';
+import os from 'os';
+import path from 'path';
+import childProcess from 'child_process';
 
-const Promise = require('bluebird');
-const chalk = require('chalk');
+import Promise from 'bluebird';
+import chalk from 'chalk';
 
-const config = require('./config');
-const builderWebpackInterface = require('./builder/builderWebpackInterface');
+import config from './config';
+import { getWebpackConfig, runCompiler, WebpackConfig } from './builder/builderWebpackInterface';
 
 
 const WORKER_PATH = path.resolve(__dirname, './builder/builderWorker.js');
 
 
-const printHeader = function (s) {
+const printHeader = function (s: string): void {
   console.log('\n**** ****');
   console.log(s);
   console.log('**** ****\n');
 };
 
 
-const runWorkerFor = function (name, webpackConfigIndex) {
-  return new Promise((resolve, reject) => {
+const runWorkerFor = function (name: string, webpackConfigIndex: number): Promise<void> {
+  return new Promise<void>((resolve: Function, reject: Function) => {
     const child = childProcess.fork(WORKER_PATH, [], {
       silent: true
     });
@@ -33,7 +34,7 @@ const runWorkerFor = function (name, webpackConfigIndex) {
     });
     child.on('message', (data) => {
       child.kill();
-      const error = data.error;
+      const error: Error = data.error;
       if (error) {
         console.log(chalk.red('Child process error:'), name, error);
         reject(error);
@@ -49,34 +50,29 @@ const runWorkerFor = function (name, webpackConfigIndex) {
 };
 
 
-const start = function (userConfigs, cb) {
+export const startBuild = function (userConfigs: UserConfig[]): Promise<void> {
   printHeader('Getting config');
-  return builderWebpackInterface.getWebpackConfig(userConfigs)
-  .then((finalWebpackConfig) => {
+  // TODO: <any> to supress weird TS Promise generic error
+  return (<any>getWebpackConfig(userConfigs))
+  .then((finalWebpackConfig: WebpackConfig[]) => {
     console.log('\nBuilding...\n');
 
     if (Array.isArray(finalWebpackConfig) && config.enableChildProcess) {
       const cores = os.cpus().length / 2;
       printHeader(`Running compilers in multithreaded mode across ${cores} cores`);
-      return Promise.map(finalWebpackConfig, (webpackConfig, i) => {
+      return Promise.map(finalWebpackConfig, (webpackConfig, i: number) => {
         return runWorkerFor(`thread_${i}`, i);
       }, { concurrency: cores });
     }
 
     printHeader('Running compiler');
-    return builderWebpackInterface.runCompiler(finalWebpackConfig);
+    return runCompiler(finalWebpackConfig);
   })
   .then(() => {
     printHeader('Done');
-    cb && cb(null);
   })
-  .catch((err) => {
-    cb && cb(err);
+  .catch((err: Error) => {
     console.log(chalk.red('Error:'), err);
+    throw err;
   });
-};
-
-
-module.exports = {
-  start: start
 };

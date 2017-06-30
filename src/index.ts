@@ -1,14 +1,14 @@
 'use strict';
 import webpack from 'webpack';
 
-import * as builder from './builder';
-import * as builderWebpackInterface from './builder/builderWebpackInterface';
-import * as persistentRunner from './persistentRunner/index';
-import * as compilerLogger from './compilerLogger';
-import * as config from './config';
-import * as envLoader from './envLoader';
-import * as installLibs from './installLibs/index';
-import * as karmaIntegration from './karmaIntegration/index';
+import { startBuild } from './builder';
+import builderWebpackInterface from './builder/builderWebpackInterface';
+import persistentRunner from './persistentRunner/index';
+import compilerLogger from './compilerLogger';
+import config from './config';
+import envLoader from './envLoader';
+import installLibs from './installLibs/index';
+import karmaIntegration from './karmaIntegration/index';
 
 
 export {
@@ -16,7 +16,6 @@ export {
   config,
   envLoader,
   installLibs,
-  builder,
   builderWebpackInterface,
   persistentRunner,
   compilerLogger,
@@ -26,4 +25,4 @@ export {
 };
 
 // Functions
-export const build = builder.start;
+export const build = startBuild;

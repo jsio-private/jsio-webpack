@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   USER_CONFIG_NAME: 'jsio-webpack.config.js',
 
   DEFAULT_MULTI_CONF_OPTIONS: {},
