@@ -468,6 +468,9 @@ module.exports = (conf, options) => {
     }
   })
   .then(() => {
+    if (!options.useDefinePlugin) {
+      return;
+    }
     // Define plugin
     log('envWhitelist=', envWhitelist);
     _.forEach(envWhitelist, (v, k) => {

@@ -211,6 +211,15 @@ Lets modules define their own aliases.  Modules need to have a `package.json`, a
 All dependencies will be checked (specified in `package.json`).  The directory `lib` will also be checked for packages.
 
 
+#### `useDefinePlugin`
+
+Required for:
+
+- `envWhitelist`
+
+Defaults to `true`
+
+
 #### `envWhitelist`
 
 Default: `[]`
