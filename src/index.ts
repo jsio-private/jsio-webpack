@@ -1,34 +1,29 @@
 'use strict';
-const webpack = require('webpack');
+import webpack from 'webpack';
 
-const builder = require('./builder');
-const builderWebpackInterface = require('./builder/builderWebpackInterface');
-const persistentRunner = require('./persistentRunner');
-const compilerLogger = require('./compilerLogger');
-const config = require('./config');
-const envLoader = require('./envLoader');
-const installLibs = require('./installLibs');
-const karmaIntegration = require('./karmaIntegration');
-
-
-const configure = (opts) => {
-  throw new Error('TODO');
-};
+import * as builder from './builder';
+import * as builderWebpackInterface from './builder/builderWebpackInterface';
+import * as persistentRunner from './persistentRunner/index';
+import * as compilerLogger from './compilerLogger';
+import * as config from './config';
+import * as envLoader from './envLoader';
+import * as installLibs from './installLibs/index';
+import * as karmaIntegration from './karmaIntegration/index';
 
 
-module.exports = {
+export {
   // Exports
-  config: config,
-  envLoader: envLoader,
-  configure: configure,
-  installLibs: installLibs,
-  builder: builder,
-  builderWebpackInterface: builderWebpackInterface,
-  persistentRunner: persistentRunner,
-  compilerLogger: compilerLogger,
-  karmaIntegration: karmaIntegration,
+  config,
+  envLoader,
+  installLibs,
+  builder,
+  builderWebpackInterface,
+  persistentRunner,
+  compilerLogger,
+  karmaIntegration,
   // Libraries
-  webpack: webpack,
-  // Functions
-  build: builder.start
+  webpack
 };
+
+// Functions
+export const build = builder.start;
