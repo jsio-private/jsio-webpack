@@ -15,6 +15,7 @@ export type MultiConfOptions = {
   useBase64FontLoader: boolean;
   useReactHot: boolean;
   backendBuild: boolean;
+  devtool: string;
   useCircularDependencyPlugin: boolean;
   useNotifications: boolean;
   useJsonSchema: boolean;
@@ -35,7 +36,20 @@ export type MultiConfOptions = {
 };
 
 
-export type Configurator = {};
+export type LoaderOptions = {
+  test?: string|RegExp;
+  exclude?: string|RegExp;
+  loaders?: string[];
+  loader?: string;
+};
+
+
+export type Configurator = {
+  merge: (conf: Object|((current: WebpackConfig) => WebpackConfig)) => void;
+  preLoader: (name: string, options: LoaderOptions) => void;
+  loader: (name: string, options: LoaderOptions) => void;
+  plugin: (name: string, pluginConstructor: Function, pluginParams?: any[]) => void;
+};
 
 
 export type ConfigFunction = {
@@ -63,6 +77,7 @@ export default class MultiConf {
       useNotifications: false,
       useJsonSchema: false,
       useShaders: false,
+      devtool: null,
       es2015: 'default',
       useGitRevisionPlugin: 'never',
       useVisualizerPlugin: false,
@@ -105,13 +120,15 @@ export default class MultiConf {
 }
 
 
-const CONFIG_FUNCTIONS = {
+const CONFIG_FUNCTIONS: {
+  [key: string]: ConfigFunction;
+} = {
   common: commonGen,
   production: productionGen,
   serve: serveGen,
   watch: watchGen
 };
 
-export const getConfigFn = (name) => {
+export const getConfigFn = function(name: string): ConfigFunction {
   return CONFIG_FUNCTIONS[name];
 };

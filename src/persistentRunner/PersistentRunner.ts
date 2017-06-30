@@ -1,12 +1,22 @@
-'use strict';
-const assign = require('object-assign');
+import assign from 'object-assign';
 
 
 /**
  * https://github.com/webpack/webpack/blob/master/lib/Compiler.js
  */
-class PersistentRunner {
-  constructor (compiler, watchOptions, handler) {
+export default class PersistentRunner {
+  public startTime: number;
+  public invalid;
+  public error: Error;
+  public stats;
+  public handler;
+  public dirty: boolean;
+  public watchOptions;
+  public compiler;
+  public running: boolean;
+  public watcher;
+
+  constructor (compiler, watchOptions?, handler?) {
     this.startTime = null;
     this.invalid = false;
     this.error = null;
@@ -87,7 +97,7 @@ class PersistentRunner {
     });
   }
 
-  _done (err, compilation) {
+  private _done (err?: Error, compilation?) {
     this.running = false;
     if (this.invalid) return this._go();
     this.error = err || null;
@@ -173,6 +183,3 @@ class PersistentRunner {
     }
   }
 }
-
-
-module.exports = PersistentRunner;

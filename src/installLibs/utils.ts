@@ -1,32 +1,38 @@
-const path = require('path');
+import path from 'path';
 
-const _ = require('lodash');
-const fs = require('fs-extra');
-const debug = require('debug');
-const Promise = require('bluebird');
+import _ from 'lodash';
+import fs from 'fs-extra';
+import debug from 'debug';
+import Promise from 'bluebird';
 
-const utils = require('../utils');
+import utils from '../utils';
 
 
 const log = debug('jsio-webpack:installLibs:utils');
 
 
-const getLibDirs = function (
-  projectDir
-) {
+export type LibDirResult = {
+  dir: string;
+  package: any;
+};
+
+
+export const getLibDirs = function(
+  projectDir: string
+): Promise<LibDirResult[]> {
   return Promise.resolve().then(() => {
     log('> getLibDirs:', projectDir);
     const dirNames = ['lib', 'modules'];
-    return Promise.map(dirNames, (dirName) => {
+    return Promise.map(dirNames, (dirName: string) => {
       const libDir = path.join(projectDir, dirName);
       if (!fs.existsSync(libDir)) {
         return [];
       }
-      const dirs = utils.getDirectories(libDir);
+      const dirs: string[] = utils.getDirectories(libDir);
       log('> > Checking dirs:', libDir, dirs);
-      return Promise.map(dirs, (dir) => {
+      return Promise.map(dirs, (dir: string) => {
         const moduleDir = path.join(libDir, dir);
-        const result = {
+        const result: LibDirResult = {
           dir: moduleDir,
           package: null
         };
@@ -37,14 +43,9 @@ const getLibDirs = function (
         return result;
       }, { concurrency: 1 });
     }, { concurrency: 1 })
-    .then((dirListList) => {
+    .then((dirListList: LibDirResult[][]) => {
       // Flatten the list of lists in to a single list [['a'], ['b']] -> ['a', 'b']
       return _.flatten(dirListList);
     });
   });
-};
-
-
-module.exports = {
-  getLibDirs: getLibDirs
 };

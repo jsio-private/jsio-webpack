@@ -1,9 +1,8 @@
-'use strict';
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
 
-const loadEnv = function (envName) {
+export const loadEnv = function (envName: string): void {
   console.log('Setting up env for:', envName);
   process.env.NODE_ENV = envName;
 
@@ -17,7 +16,7 @@ const loadEnv = function (envName) {
   const data = fs.readFileSync(envFilePath, 'utf-8');
   const lines = data.split('\n');
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const line: string = lines[i];
     if (line.indexOf('#') === 0) {
       continue;
     }
@@ -36,9 +35,4 @@ const loadEnv = function (envName) {
     console.log(`\t ${envKey} = ${envValue}`);
     process.env[envKey] = envValue;
   }
-};
-
-
-module.exports = {
-  loadEnv: loadEnv
 };

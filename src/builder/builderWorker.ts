@@ -1,8 +1,7 @@
-'use strict';
-const _ = require('lodash');
+import _ from 'lodash';
 
-const config = require('../config');
-const builderWebpackInterface = require('./builderWebpackInterface');
+import config from '../config';
+import { getWebpackConfig, runCompiler, WebpackConfig } from './builderWebpackInterface';
 
 
 process.on('message', function (data) {
@@ -16,20 +15,20 @@ process.on('message', function (data) {
     });
   }
 
-  builderWebpackInterface.getWebpackConfig()
-  .then((finalWebpackConfigs) => {
+  getWebpackConfig()
+  .then((finalWebpackConfigs: WebpackConfig[]) => {
     if (!Array.isArray(finalWebpackConfigs)) {
       throw new Error(`finalWebpackConfigs is not array: ${typeof finalWebpackConfigs}`);
     }
 
-    const targetWebpackConfig = finalWebpackConfigs[webpackConfigIndex];
+    const targetWebpackConfig: WebpackConfig = finalWebpackConfigs[webpackConfigIndex];
     console.log('Webpack config:', targetWebpackConfig);
-    return builderWebpackInterface.runCompiler(targetWebpackConfig);
+    return runCompiler([targetWebpackConfig]);
   })
   .then(() => {
     process.send({ error: null });
   })
-  .catch((err) => {
+  .catch((err: Error) => {
     process.send({
       error: {
         name: err.name,

@@ -1,12 +1,12 @@
-'use strict';
-const util = require('util');
-const path = require('path');
+import dynamicRequire from '../dynamicRequire';
+import util from 'util';
+import path from 'path';
 
-const _ = require('lodash');
-const Server = require('karma').Server;
+import _ from 'lodash';
+import { Server } from 'karma';
 
-const builder = require('../builder');
-const config = require('../config');
+import { getWebpackConfig } from '../builder/builderWebpackInterface';
+import config from '../config';
 
 
 const runKarma = function () {
@@ -25,7 +25,7 @@ const runKarma = function () {
     ];
   });
 
-  return builder.getWebpackConfig()
+  return getWebpackConfig()
   .then((webpackConfig) => {
     const webpackConfigForKarma = _.cloneDeep(webpackConfig[0]);
     console.log('(stripping webpack config entry, not required for karma)');
@@ -162,7 +162,7 @@ const runKarma = function () {
     };
 
     if (config.karma.configFilePath) {
-      const userConfig = require(path.resolve(process.env.PWD, config.karma.configFilePath));
+      const userConfig = dynamicRequire(path.resolve(process.env.PWD, config.karma.configFilePath));
       karmaConfig = userConfig(karmaConfig);
     }
 

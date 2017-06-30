@@ -1,4 +1,3 @@
-'use strict';
 import { UserConfig } from './builder/builderConfig';
 import os from 'os';
 import path from 'path';

@@ -1,20 +1,20 @@
-const path = require('path');
+import path from 'path';
 
-const Promise = require('bluebird');
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const childProcessPromise = require('child-process-promise');
+import Promise from 'bluebird';
+import chalk from 'chalk';
+import fs from 'fs-extra';
+import childProcessPromise from 'child-process-promise';
 
 
 // See: http://stackoverflow.com/questions/18112204/get-all-directories-within-directory-nodejs
-const getDirectories = function (d) {
-  return fs.readdirSync(d).filter((file) => {
+export const getDirectories = function(d: string): string[] {
+  return fs.readdirSync(d).filter((file: string) => {
     return fs.statSync(path.join(d, file)).isDirectory();
   });
 };
 
 
-const runChildProcess = function (cmd, args, options) {
+export const runChildProcess = function(cmd, args, options): Promise<void> {
   return Promise.resolve().then(() => {
     const prefix = chalk.gray('[spawn]');
     console.log(prefix, 'Spawning:', cmd, args, options);
@@ -27,14 +27,9 @@ const runChildProcess = function (cmd, args, options) {
     childProcess.stderr.on('data', (data) => {
       console.log(prefix, chalk.bgRed('stderr'), data.toString().trim());
     });
-    return Promise.resolve(promise).tap(() => {
+    // TODO: Promise type error
+    return (<any>Promise.resolve(promise)).tap(() => {
       console.log(prefix, chalk.gray(`childProcess ${childProcess.pid} exited`));
     });
   });
-};
-
-
-module.exports = {
-  getDirectories: getDirectories,
-  runChildProcess: runChildProcess
 };

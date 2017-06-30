@@ -24,12 +24,29 @@ const printConfig = (title, data) => {
 
 export type WebpackConfig = {
   output: {
-    publicPath: string;
+    publicPath?: string;
   };
+  resolve: {
+    fallback?: string;
+    root?: string[];
+    extensions?: string[];
+  };
+  resolveLoader: {
+    root?: string[];
+  };
+  devtool?: string;
+  target?: string;
+  externals?: Function[];
+  node?: any;
+  // Types added by plugins
+  stylus?: any;
+  stylint?: any;
 };
 
 
-export const getWebpackConfig = function(userConfigs: UserConfig[]): Promise<WebpackConfig[]> {
+export const getWebpackConfig = function(
+  userConfigs?: UserConfig[]
+): Promise<WebpackConfig[]> {
   return new Promise<MultiConf[]>((resolve, reject) => {
     if (!userConfigs) {
       userConfigs = getUserConfigs(process.env.PWD);

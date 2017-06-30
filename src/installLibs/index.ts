@@ -1,14 +1,13 @@
-const path = require('path');
+import path from 'path';
 
-const Promise = require('bluebird');
-// const gitState = Promise.promisifyAll(require('git-state'));
-const fs = require('fs-extra');
-const debug = require('debug');
-const chalk = require('chalk');
+import Promise from 'bluebird';
+import fs from 'fs-extra';
+import debug from 'debug';
+import chalk from 'chalk';
 
-const config = require('../config');
-const utils = require('../utils');
-const installLibsUtils = require('./utils');
+import config from '../config';
+import utils from '../utils';
+import installLibsUtils from './utils';
 
 
 const log = debug('jsio-webpack:installLibs');

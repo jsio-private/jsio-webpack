@@ -20,9 +20,10 @@ export default {
     port: 9876,
     // TODO: one day we should require the file directly
     files: 'dist/tests.js',
-    preprocessorKeys: ''
+    preprocessorKeys: '',
     // files: 'tests/index.js',
     // preprocessorKeys: 'tests,src'
+    configFilePath: null
   },
   // postinstall libs
   isInstallLibs: false,

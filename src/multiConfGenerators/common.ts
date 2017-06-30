@@ -1,28 +1,28 @@
-'use strict';
-const path = require('path');
-const querystring = require('querystring');
+import { WebpackConfig } from '../builder/builderWebpackInterface';
+import { ConfigFunction, Configurator, MultiConfOptions } from '../multiConf';
+import path from 'path';
+import querystring from 'querystring';
 
-const fs = require('fs-extra');
-const Promise = require('bluebird');
-const colors = require('colors');
-const nib = require('nib');
-const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-const WebpackErrorNotificationPlugin = require('webpack-error-notification');
-const CircularDependencyPlugin = require('circular-dependency-plugin');
-const chalk = require('chalk');
-const npm = require('npm');
-const _ = require('lodash');
-const debug = require('debug');
-const nodeExternals = require('webpack-node-externals');
-const GitRevisionPlugin = require('git-revision-webpack-plugin');
-const Visualizer = require('webpack-visualizer-plugin');
+import fs from 'fs-extra';
+import Promise from 'bluebird';
+import nib from 'nib';
+import webpack from 'webpack';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import ProgressBarPlugin from 'progress-bar-webpack-plugin';
+import WebpackErrorNotificationPlugin from 'webpack-error-notification';
+import CircularDependencyPlugin from 'circular-dependency-plugin';
+import chalk from 'chalk';
+import npm from 'npm';
+import _ from 'lodash';
+import debug from 'debug';
+import nodeExternals from 'webpack-node-externals';
+import GitRevisionPlugin from 'git-revision-webpack-plugin';
+import Visualizer from 'webpack-visualizer-plugin';
 
-const EncryptedBuildPlugin = require('encrypted-build-webpack-plugin');
+import EncryptedBuildPlugin from 'encrypted-build-webpack-plugin';
 
-const config = require('../config');
-const installLibsUtils = require('../installLibs/utils');
+import config from '../config';
+import { getLibDirs } from '../installLibs/utils';
 
 import dynamicRequire from '../dynamicRequire';
 
@@ -31,8 +31,8 @@ const log = debug('jsio-webpack:multiConf:common');
 
 
 // See: http://stackoverflow.com/a/38733864
-const isExternal = (module) => {
-  const userRequest = module.userRequest;
+const isExternal = function(moduleItem) {
+  const userRequest = moduleItem.userRequest;
   if (typeof userRequest !== 'string') {
     return false;
   }
@@ -40,7 +40,7 @@ const isExternal = (module) => {
 };
 
 
-const resolveBabelPresets = (preset) => {
+const resolveBabelPresets = function(preset: string): string {
   if (Array.isArray(preset)) {
     preset[0] = dynamicRequire.resolve(preset[0]);
     return preset;
@@ -49,11 +49,17 @@ const resolveBabelPresets = (preset) => {
 };
 
 
-const _handleModule = (options, modulePath, npmModule, moduleOpts) => {
+const _handleModule = function(
+  options: MultiConfOptions,
+  modulePath: string,
+  packageContents: NpmListResult,
+  moduleOpts: ModuleOpts
+): Promise<void> {
   log('handleModule:', modulePath);
-  return Promise.resolve().then(() => {
+  // TODO: Promise type error
+  return (<any>Promise.resolve()).then(() => {
     if (options.useModuleAliases) {
-      const _aliases = _.get(npmModule, 'jsioWebpack.alias');
+      const _aliases = _.get(packageContents, 'jsioWebpack.alias');
       _.forEach(_aliases, (v, k) => {
         if (moduleOpts.aliases[k]) {
           throw new Error(
@@ -61,14 +67,14 @@ const _handleModule = (options, modulePath, npmModule, moduleOpts) => {
             ' Existing alias: ' + moduleOpts.aliases[k]
           );
         }
-        log(`Adding alias from ${npmModule.name}: ${k} -> ${v}`);
+        log(`Adding alias from ${packageContents.name}: ${k} -> ${v}`);
         moduleOpts.aliases[k] = path.join(modulePath, v);
       });
     }
 
-    const _envWhitelist = _.get(npmModule, 'jsioWebpack.envWhitelist');
+    const _envWhitelist = _.get(packageContents, 'jsioWebpack.envWhitelist');
     if (_envWhitelist) {
-      log(`Adding envWhitelist from ${npmModule.name}: -> ${_envWhitelist}`);
+      log(`Adding envWhitelist from ${packageContents.name}: -> ${_envWhitelist}`);
       _.forEach(_envWhitelist, (v, k) => {
         if (moduleOpts.envWhitelist[k]) {
           console.warn('Overwriting existing envWhitelist entry:', moduleOpts.envWhitelist[k]);
@@ -78,13 +84,13 @@ const _handleModule = (options, modulePath, npmModule, moduleOpts) => {
     }
 
     // Handle nested module dependencies
-    if (_.size(npmModule.dependencies) === 0) {
+    if (_.size(packageContents.dependencies) === 0) {
       return;
     }
     return Promise.map(
-      Object.keys(npmModule.dependencies),
+      Object.keys(packageContents.dependencies),
       (depKey) => {
-        const dep = npmModule.dependencies[depKey];
+        const dep: string|NpmListResult = packageContents.dependencies[depKey];
         let depPath;
         if (dep.path) {
           depPath = dep.path;
@@ -106,7 +112,7 @@ const _handleModule = (options, modulePath, npmModule, moduleOpts) => {
   .then(() => {
     // Handle nested libs
     return Promise.resolve().then(() => {
-      return installLibsUtils.getLibDirs(modulePath);
+      return getLibDirs(modulePath);
     })
     .then((libDirs) => {
       log('> Handle lib dirs:', libDirs);
@@ -125,25 +131,39 @@ const _handleModule = (options, modulePath, npmModule, moduleOpts) => {
 };
 
 
-const getModuleOpts = (options, projectDir) => {
-  console.log('\n' + colors.green('Getting module aliases...') + '\n');
-  const moduleOpts = {
+type NpmListResult = {
+  path: string;
+  name: string;
+  dependencies: { [key: string]: NpmListResult; };
+};
+
+
+type ModuleOpts = {
+  aliases: { [key: string]: string; };
+  envWhitelist: { [key: string]: string; };
+};
+
+
+const getModuleOpts = function(options: MultiConfOptions, projectDir: string): Promise<ModuleOpts> {
+  console.log('\n' + chalk.green('Getting module aliases...') + '\n');
+  const moduleOpts: ModuleOpts = {
     aliases: {},
     envWhitelist: {}
   };
   log('Loading npm');
   return Promise.resolve().then(() => {
     log('> Handle npm deps');
-    return Promise.promisify(npm.load, npm)({});
+    // TODO: More promise type errors
+    return (<any>Promise.promisify)(npm.load, npm)({});
   })
   .then((npm) => {
     return new Promise((resolve, reject) => {
       log('Running npm.list');
-      npm.list((stringList, res) => {
+      npm.list((stringList, res: NpmListResult) => {
         resolve(res);
       });
     })
-    .then((res) => {
+    .then((res: NpmListResult) => {
       return _handleModule(options, res.path, res, moduleOpts);
     });
   })
@@ -154,13 +174,12 @@ const getModuleOpts = (options, projectDir) => {
 };
 
 
-
-module.exports = (conf, options) => {
+const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiConfOptions) {
   const pwd = path.resolve(process.cwd());
   const resolveExtensions = [''];
 
   // BASE CONFIG
-  conf.merge((current) => {
+  conf.merge((current: WebpackConfig) => {
     current.resolve = current.resolve || {};
     const nodeModulesPath = path.resolve(__dirname, '..', '..', 'node_modules');
     current.resolve.fallback = nodeModulesPath;
@@ -256,7 +275,8 @@ module.exports = (conf, options) => {
 
 
   const ifdefOpts = _.merge({}, options.ifdefOpts);
-  const ifdefLoaderString = 'ifdef-loader?' + querystring.encode({ json: JSON.stringify(ifdefOpts) });
+  // TODO: type error
+  const ifdefLoaderString = 'ifdef-loader?' + (<any>querystring).encode({ json: JSON.stringify(ifdefOpts) });
 
 
   conf.loader('worker', {
@@ -437,7 +457,7 @@ module.exports = (conf, options) => {
     }]);
   }
 
-  conf.merge((current) => {
+  conf.merge((current: WebpackConfig) => {
     current.resolve.extensions = resolveExtensions;
     return current;
   });
@@ -450,21 +470,21 @@ module.exports = (conf, options) => {
     // module aliases
     if (options.scanLibs) {
       return getModuleOpts(options, pwd)
-        .then((moduleOpts) => {
-          log('Found module opts:', moduleOpts);
-          if (options.useModuleAliases) {
-            conf.merge({
-              resolve: {
-                alias: moduleOpts.aliases
-              }
-            });
-          }
+      .then((moduleOpts) => {
+        log('Found module opts:', moduleOpts);
+        if (options.useModuleAliases) {
+          conf.merge({
+            resolve: {
+              alias: moduleOpts.aliases
+            }
+          });
+        }
 
-          addTowhitelist(envWhitelist, moduleOpts.envWhitelist);
-        })
-        .then(() => {
-          resolve();
-        });
+        addTowhitelist(envWhitelist, moduleOpts.envWhitelist);
+      })
+      .then(() => {
+        resolve();
+      });
     } else {
       resolve();
     }
@@ -472,40 +492,42 @@ module.exports = (conf, options) => {
   .then(() => {
     // Define plugin
     log('envWhitelist=', envWhitelist);
-    _.forEach(envWhitelist, (v, k) => {
+    _.forEach(envWhitelist, (v: string, k: string) => {
       defines[k] = v ? '' + v : '';
     });
 
     let defineOpts = {};
     if (options.flatProcessEnv) {
-      _.forEach(defines, (v, k) => {
+      _.forEach(defines, (v: any, k: string) => {
         defineOpts['process.env.' + k] = JSON.stringify(v);
       });
     } else {
-      defineOpts['process.env'] = _.mapValues(defines, v => JSON.stringify(v));
+      defineOpts['process.env'] = _.mapValues(defines, (v: any) => JSON.stringify(v));
     }
     conf.plugin('webpackDefine', webpack.DefinePlugin, [defineOpts]);
   });
 };
 
+export default buildConfig;
+
 
 /** Merges `envWhitelist`s */
 const addTowhitelist = function (
-  envWhitelistMain,
-  envWhitelist
+  envWhitelistMain: { [key: string]: string; },
+  envWhitelist: string[]|{ [key: string]: string; }
 ) {
   log('addTowhitelist', envWhitelist);
   // Support older api where you can whitelist an array without default values
   if (Array.isArray(envWhitelist)) {
     const envWhitelistObject = {};
-    _.forEach(envWhitelist, (v, i) => {
+    _.forEach(envWhitelist, (v: string, i: number) => {
       envWhitelistObject[v] = '';
     });
     addTowhitelist(envWhitelistMain, envWhitelistObject);
     return;
   }
 
-  _.forEach(envWhitelist, (defaultValue, k) => {
+  _.forEach(envWhitelist, (defaultValue: string, k: string) => {
     if (envWhitelistMain[k]) {
       console.log('Overwriting existing envWhitelistMain entry:', envWhitelistMain[k]);
     }

@@ -4,9 +4,7 @@
 const yargs = require('yargs');
 
 const jsioWebpack = require('../dist/jsioWebpack');
-
 const config = jsioWebpack.config;
-const envLoader = jsioWebpack.envLoader;
 
 
 let arg = yargs
@@ -90,7 +88,7 @@ config.watch = mainArgv.watch;
 if (mainArgv.env) {
   config.env = mainArgv.env;
 }
-envLoader.loadEnv(config.env);
+jsioWebpack.loadEnv(config.env);
 
 
 if (config.isKarma) {

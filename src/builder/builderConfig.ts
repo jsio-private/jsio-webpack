@@ -1,4 +1,3 @@
-'use strict';
 import { WebpackConfig } from './builderWebpackInterface';
 import { default as MultiConf, getConfigFn, ConfigFunction } from '../multiConf';
 import fs from 'fs';
@@ -42,8 +41,8 @@ export const buildMultiConfs = function(userConfigs: UserConfig[]): Promise<Mult
   return Promise.map(userConfigs, (userConfig: UserConfig) => {
     const _multiConf = new MultiConf(userConfig);
 
-    const userConfiguratorFn = userConfig.configure || userConfig;
-    const configs = [
+    const userConfiguratorFn: ConfigFunction = userConfig.configure || <any>userConfig;
+    const configs: ConfigFunction[] = [
       userConfiguratorFn,
       getConfigFn('common')
     ];

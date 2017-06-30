@@ -1,14 +1,15 @@
-'use strict';
-const chalk = require('chalk');
+import chalk from 'chalk';
 
-const handleFatalError = (err) => {
+
+const handleFatalError = function(error): void {
   console.error('Fatal Error:');
-  console.error(err.stack);
+  console.error(error.stack);
 };
 
-const handleSoftErrors = (errors) => {
+
+const handleSoftErrors = function(errors: any[]): void {
   console.error('Soft Errors:')
-  errors.forEach(err => {
+  errors.forEach((err) => {
     let s = chalk.red(err.message);
     if (err.details) {
       s += '\n' + chalk.yellow(err.details);
@@ -20,17 +21,20 @@ const handleSoftErrors = (errors) => {
   });
 };
 
-const handleWarnings = (warnings) => {
+
+const handleWarnings = (warnings: any[]) => {
   console.warn('Warnings:');
-  warnings.forEach(warning => console.warn(warning.message));
+  warnings.forEach((warning) => console.warn(warning.message));
 };
 
-const successfullyCompiled = (stats) => {
+
+const successfullyCompiled = function(stats) {
   console.log('Stats:');
   console.log(stats.toString({ colors: true }));
 };
 
-const pprintStats = (stats) => {
+
+const pprintStats = function(stats: any|any[]) {
   // Handle multistats
   if (Array.isArray(stats.stats)) {
     stats.stats.forEach(pprintStats);
@@ -49,11 +53,11 @@ const pprintStats = (stats) => {
   // }
 };
 
-const onBuild = (err, stats) => {
+const onBuild = function(err: Error, stats: any|any[]): void {
   if (err) {
     return handleFatalError(err);
   }
   pprintStats(stats);
 };
 
-module.exports = onBuild;
+export default onBuild;
