@@ -36,18 +36,17 @@ const pprintStats = (stats) => {
     stats.stats.forEach(pprintStats);
     return;
   }
-
-  const compilation = stats.compilation;
-
-  if (stats.hasErrors()) {
-    return handleSoftErrors(compilation.errors);
-  }
-  // NOTE: Warnings are handled by stats.toString()
-  // If we stop using that, add this back
-  if (stats.hasWarnings()) {
-    handleWarnings(compilation.warnings);
-  }
   successfullyCompiled(stats);
+
+  // const compilation = stats.compilation;
+  // if (stats.hasErrors()) {
+  //   handleSoftErrors(compilation.errors);
+  // }
+  // // NOTE: Warnings are handled by stats.toString()
+  // // If we stop using that, add this back
+  // if (stats.hasWarnings()) {
+  //   handleWarnings(compilation.warnings);
+  // }
 };
 
 const onBuild = (err, stats) => {
