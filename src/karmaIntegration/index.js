@@ -74,7 +74,7 @@ const runKarma = function () {
 
       plugins: [
         'karma-mocha',
-        'karma-requirejs',
+        // 'karma-requirejs',
         'karma-chrome-launcher',
         'karma-mocha-reporter',
         'karma-webpack',

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "sourceMap": false,
+    "allowJs": true
+  },
+  "include": [
+    "src/*",
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
