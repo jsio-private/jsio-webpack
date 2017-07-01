@@ -1,10 +1,11 @@
+import { WebpackConfig } from '../Configurator';
 import MultiConf from '../multiConf';
 import util from 'util';
 
 import debug from 'debug';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import webpack from 'webpack';
+import { default as webpack } from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 
 import config from '../config';
@@ -19,28 +20,6 @@ const printConfig = (title, data) => {
   console.log(title);
   console.log(util.inspect(data, { colors: true, depth: 5 }));
   console.log('');
-};
-
-
-export type WebpackConfig = {
-  output: {
-    publicPath?: string;
-  };
-  resolve: {
-    fallback?: string;
-    root?: string[];
-    extensions?: string[];
-  };
-  resolveLoader: {
-    root?: string[];
-  };
-  devtool?: string;
-  target?: string;
-  externals?: Function[];
-  node?: any;
-  // Types added by plugins
-  stylus?: any;
-  stylint?: any;
 };
 
 

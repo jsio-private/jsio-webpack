@@ -12,8 +12,8 @@ import PersistentRunner from './PersistentRunner';
  * https://github.com/webpack/webpack/blob/master/lib/webpack.js#L13
  */
 const fakeWebpack = function(options) {
-  const WebpackOptionsDefaulter = webpack.WebpackOptionsDefaulter;
-  const MultiCompiler = webpack.MultiCompiler;
+  const WebpackOptionsDefaulter = (<any>webpack).WebpackOptionsDefaulter;
+  const MultiCompiler = <any>webpack.MultiCompiler;
   // const validateWebpackOptions = webpack.validate;
   // const WebpackOptionsValidationError = require('webpack/WebpackOptionsValidationError');
 
@@ -60,8 +60,8 @@ const hashConfig = function(config) {
 
 const getCompiler = function(config) {
   const Compiler = webpack.Compiler;
-  const NodeEnvironmentPlugin = webpack.NodeEnvironmentPlugin;
-  const WebpackOptionsApply = webpack.WebpackOptionsApply;
+  const NodeEnvironmentPlugin = (<any>webpack).NodeEnvironmentPlugin;
+  const WebpackOptionsApply = (<any>webpack).WebpackOptionsApply;
 
   const compiler = new Compiler();
   compiler.options = config;

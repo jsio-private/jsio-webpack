@@ -1,4 +1,4 @@
-import { WebpackConfig } from './builderWebpackInterface';
+import { WebpackConfig } from '../Configurator';
 import { default as MultiConf, getConfigFn, ConfigFunction } from '../multiConf';
 import fs from 'fs';
 import path from 'path';
@@ -10,9 +10,6 @@ import config from '../config';
 import multiConf from '../multiConf';
 
 import dynamicRequire from '../dynamicRequire';
-
-
-export type Configurator = {};
 
 
 export type UserConfig = {
@@ -65,7 +62,7 @@ export const buildMultiConfs = function(userConfigs: UserConfig[]): Promise<Mult
     return Promise.map(multiConfs, (multiConf) => {
       // Apply some stuff after
       if (config.isServer) {
-        const webpackConfig = multiConf.configurator._config;
+        const webpackConfig: WebpackConfig = multiConf.configurator.config;
         _.forEach(webpackConfig.entry, (v, k) => {
           const newEntries = []
           newEntries.push(`webpack-dev-server/client?http://${config.serve.host}:${config.serve.port}/`);

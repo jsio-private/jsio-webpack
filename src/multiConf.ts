@@ -1,15 +1,16 @@
+import { default as Configurator, WebpackConfig } from './Configurator';
 import { UserConfig } from './builder/builderConfig';
-import { WebpackConfig } from './builder/builderWebpackInterface';
-import WebpackConfigurator from 'webpack-configurator';
 import Promise from 'bluebird';
 
 import serveGen from './multiConfGenerators/serve';
 import productionGen from './multiConfGenerators/production';
 import watchGen from './multiConfGenerators/watch';
 import commonGen from './multiConfGenerators/common';
+import { LoaderRule } from 'webpack';
 
 
 export type MultiConfOptions = {
+  useStylus: boolean;
   useStylusExtractText: boolean;
   useVendorChunk: boolean;
   useBase64FontLoader: boolean;
@@ -36,38 +37,23 @@ export type MultiConfOptions = {
 };
 
 
-export type LoaderOptions = {
-  test?: string|RegExp;
-  exclude?: string|RegExp;
-  loaders?: string[];
-  loader?: string;
-};
-
-
-export type Configurator = {
-  merge: (conf: Object|((current: WebpackConfig) => WebpackConfig)) => void;
-  preLoader: (name: string, options: LoaderOptions) => void;
-  loader: (name: string, options: LoaderOptions) => void;
-  plugin: (name: string, pluginConstructor: Function, pluginParams?: any[]) => void;
-};
-
-
 export type ConfigFunction = {
   (configurator: Configurator, options: MultiConfOptions): void|Promise<void>;
 };
 
 
 export default class MultiConf {
-  public configurator;
+  public configurator: Configurator;
   public options: MultiConfOptions;
   public userConfig: UserConfig;
 
   constructor(userConfig: UserConfig) {
     this.userConfig = userConfig;
 
-    this.configurator = new WebpackConfigurator();
+    this.configurator = new Configurator();
 
     this.options = {
+      useStylus: true,
       useStylusExtractText: false,
       useVendorChunk: false,
       useBase64FontLoader: false,

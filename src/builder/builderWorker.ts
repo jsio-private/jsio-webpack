@@ -1,7 +1,8 @@
+import { WebpackConfig } from '../Configurator';
 import _ from 'lodash';
 
 import config from '../config';
-import { getWebpackConfig, runCompiler, WebpackConfig } from './builderWebpackInterface';
+import { getWebpackConfig, runCompiler } from './builderWebpackInterface';
 
 
 process.on('message', function (data) {

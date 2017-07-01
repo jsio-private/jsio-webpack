@@ -2,8 +2,6 @@
 
 This project aims to make working with webpack easy at js.io.
 
-Read up on how to use [webpack-configurator](https://www.npmjs.com/package/webpack-configurator) if you are unfamiliar.
-
 
 
 ## Usage
@@ -77,6 +75,11 @@ module.exports = {
 ### Configure options
 
 A brief explanation of the options available:
+
+
+#### `useStylus`
+
+Default: `true`
 
 
 #### `useStylusExtractText`

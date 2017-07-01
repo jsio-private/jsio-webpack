@@ -1,12 +1,12 @@
-import { WebpackConfig } from '../builder/builderWebpackInterface';
-import { ConfigFunction, Configurator, MultiConfOptions } from '../multiConf';
+import { default as Configurator, WebpackConfig } from '../Configurator';
+import { ConfigFunction, MultiConfOptions } from '../multiConf';
 import path from 'path';
 import querystring from 'querystring';
 
 import fs from 'fs-extra';
 import Promise from 'bluebird';
 import nib from 'nib';
-import webpack from 'webpack';
+import { default as webpack } from 'webpack';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import ProgressBarPlugin from 'progress-bar-webpack-plugin';
 import WebpackErrorNotificationPlugin from 'webpack-error-notification';
@@ -176,16 +176,17 @@ const getModuleOpts = function(options: MultiConfOptions, projectDir: string): P
 
 const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiConfOptions) {
   const pwd = path.resolve(process.cwd());
-  const resolveExtensions = [''];
+  const resolveExtensions = [];
 
   // BASE CONFIG
   conf.merge((current: WebpackConfig) => {
     current.resolve = current.resolve || {};
-    const nodeModulesPath = path.resolve(__dirname, '..', '..', 'node_modules');
-    current.resolve.fallback = nodeModulesPath;
+    const nodeModulesPath = path.resolve(__dirname, '..', 'node_modules');
+    // TODO: what is this in webpack v2?
+    // current.resolve.fallback = nodeModulesPath;
     current.resolveLoader = current.resolveLoader || {};
 
-    current.resolve.root = current.resolveLoader.root = [
+    current.resolve.modules = current.resolveLoader.modules = [
       path.join(pwd, 'node_modules'), // Project node_modules
       nodeModulesPath // jsio-webpack node_modules
     ];
@@ -200,33 +201,20 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
         if (i++ > 50) {
           throw new Error('max depth exceeded');
         }
-        current.resolveLoader.root.push(testPath);
+        current.resolveLoader.modules.push(testPath);
         testPath = path.dirname(testPath);
       }
     }
 
-    current.stylus = {
-      use: [nib()],
-      import: ['~nib/lib/nib/index.styl'],
-      preferPathResolver: 'webpack'
-    }
-    current.stylint = {
-      options: {
-        config: {
-          colons: 'never'
-        }
-      }
-    };
-
     // If the user wants, forward one, otherwise no devtool
-    current.devtool = options.devtool;
+    current.devtool = <any>options.devtool;
 
     if (options.backendBuild) {
       current.target = 'node';
       if (!current.externals) {
         current.externals = [];
       }
-      current.externals.push(nodeExternals(options.nodeExternalsOpts));
+      (<any[]>current.externals).push(nodeExternals(options.nodeExternalsOpts));
       // const importType = 'commonjs';
       // current.externals.push(function (context, request, callback) {
       //   const relativePath = path.relative(pwd, context);
@@ -246,13 +234,27 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   });
 
   // PRELOADERS
-  conf.preLoader('eslint', {
+  conf.loader('eslint', {
     test: /\.jsx?$/,
-    exclude: /(node_modules)/
+    exclude: /(node_modules)/,
+    loader: 'eslint-loader',
+    enforce: 'pre'
   });
-  conf.preLoader('stylint', {
-    test: /\.styl$/
-  });
+
+  // TODO: stylint loader is no longer maintained: https://github.com/guerrero/stylint-loader/issues/9
+  // current.stylint = {
+  //   options: {
+  //     config: {
+  //       colons: 'never'
+  //     }
+  //   }
+  // };
+  // conf.loader('stylint', {
+  //   test: /\.styl$/,
+  //   use: 'stylint-loader',
+  //   enforce: 'pre'
+  // });
+
   // conf.preLoader('tslint', {})
 
   // LOADERS
@@ -260,7 +262,17 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     resolveExtensions.push('.schema.json');
     conf.loader('json-schema', {
       test: /\.schema\.json$/,
-      loaders: ['json-schema-loader?useSource=true', 'webpack-comment-remover-loader']
+      use: [
+        {
+          loader: 'json-schema-loader',
+          options: {
+            useSource: true
+          }
+        },
+        {
+          loader: 'webpack-comment-remover-loader'
+        }
+      ]
     });
   }
 
@@ -270,20 +282,27 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     // Ugly regex to exclude schema.json files
     test: /^[^\.]+?(?!\.schema)\.json$/,
     // test: /\.json$/,
-    loaders: ['json-loader', 'webpack-comment-remover-loader']
+    use: [
+      'json-loader',
+      'webpack-comment-remover-loader'
+    ]
   });
 
-
-  const ifdefOpts = _.merge({}, options.ifdefOpts);
-  // TODO: type error
-  const ifdefLoaderString = 'ifdef-loader?' + (<any>querystring).encode({ json: JSON.stringify(ifdefOpts) });
-
+  const ifdefLoader = {
+    loader: 'ifdef-loader',
+    options: _.merge({}, options.ifdefOpts)
+  };
 
   conf.loader('worker', {
     test: /\.worker\.js$/,
-    loaders: [
-      'worker-loader?inline=true',
-      ifdefLoaderString
+    use: [
+      {
+        loader: 'worker-loader',
+        options: {
+          inline: true
+        }
+      },
+      ifdefLoader
     ]
   });
 
@@ -307,10 +326,13 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   }
   const resolvedBabelPlugins = babelPlugins.map(resolveBabelPresets);
 
-  let babelLoaderString = 'babel-loader?' + JSON.stringify({
-    presets: resolvedBabelPresets,
-    plugins: resolvedBabelPlugins
-  });
+  let babelLoader = {
+    loader: 'babel-loader',
+    options: {
+      presets: resolvedBabelPresets,
+      plugins: resolvedBabelPlugins
+    }
+  };
 
   resolveExtensions.push('.ts');
   resolveExtensions.push('.tsx');
@@ -318,13 +340,16 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     test: /\.tsx?$/,
     exclude: /node_modules/,
     // loader: tsLoaderString
-    loaders: [
-      babelLoaderString,
-      'ts-loader?' + JSON.stringify({
-        visualStudioErrorFormat: true,
-        ignoreDiagnostics: options.typescriptIgnoreDiagnostics
-      }),
-      ifdefLoaderString
+    use: [
+      babelLoader,
+      {
+        loader: 'ts-loader',
+        options: {
+          visualStudioErrorFormat: true,
+          ignoreDiagnostics: options.typescriptIgnoreDiagnostics
+        }
+      },
+      ifdefLoader
     ]
   });
 
@@ -334,9 +359,9 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     test: /\.jsx?$/,
     // include: path.join(__dirname, 'src'),
     exclude: /(node_modules)/,
-    loaders: [
-      babelLoaderString,
-      ifdefLoaderString
+    use: [
+      babelLoader,
+      ifdefLoader
     ]
   });
 
@@ -346,11 +371,13 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   });
 
   conf.loader('xml', {
-    test: /\.(xml)$/
+    test: /\.(xml)$/,
+    loader: 'xml-loader'
   });
 
   conf.loader('file', {
-    test: /\.(jpe?g|gif|png|wav|mp3|ogv|ogg|mp4|webm)$/
+    test: /\.(jpe?g|gif|png|wav|mp3|ogv|ogg|mp4|webm)$/,
+    loader: 'file-loader'
   });
 
   if (options.useShaders) {
@@ -375,7 +402,13 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     })
     conf.loader('woff', {
       test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: 'url-loader?limit=10000&mimetype=application/font-woff'
+      use: [{
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          mimetype: 'application/font-woff'
+        }
+      }]
     });
   }
 
@@ -431,23 +464,44 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     conf.plugin('Visualizer', Visualizer, []);
   }
 
-  if (config.env === 'production' && options.useStylusExtractText) {
-    // Use ExtractTextPlugin for production
-    const stylusLoader = ExtractTextPlugin.extract(
-      'style-loader',
-      'css-loader!stylus-loader'
-    );
-    conf.loader('stylus', {
-      test: /\.styl$/,
-      loader: stylusLoader
-    });
-    conf.plugin('stylusExtractText', ExtractTextPlugin, ['[name].css']);
-  } else {
-    // Use normal style-loader in dev (hot reload css)
-    conf.loader('stylus', {
-      test: /\.styl$/,
-      loader: 'style-loader!css-loader!stylus-loader'
-    });
+  if (options.useStylus) {
+    const stylusOptions = {
+      use: [nib()],
+      import: ['~nib/lib/nib/index.styl'],
+      preferPathResolver: 'webpack'
+    };
+
+    if (config.env === 'production' && options.useStylusExtractText) {
+      // Use ExtractTextPlugin for production
+      const stylusLoader = ExtractTextPlugin.extract({
+        fallback: { loader: 'style-loader' },
+        use: [
+          { loader: 'css-loader' },
+          {
+            loader: 'stylus-loader',
+            options: stylusOptions
+          }
+        ]
+      });
+      conf.loader('stylus', {
+        test: /\.styl$/,
+        loader: stylusLoader
+      });
+      conf.plugin('stylusExtractText', ExtractTextPlugin, ['[name].css']);
+    } else {
+      // Use normal style-loader in dev (hot reload css)
+      conf.loader('stylus', {
+        test: /\.styl$/,
+        use: [
+          { loader: 'style-loader' },
+          { loader: 'css-loader' },
+          {
+            loader: 'stylus-loader',
+            options: stylusOptions
+          }
+        ]
+      });
+    }
   }
 
   const encryptionKey = process.env.WEBPACK_ENCRYPTION_KEY;

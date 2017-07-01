@@ -1,3 +1,4 @@
+import { WebpackConfig } from './Configurator';
 import { UserConfig } from './builder/builderConfig';
 import os from 'os';
 import path from 'path';
@@ -7,7 +8,7 @@ import Promise from 'bluebird';
 import chalk from 'chalk';
 
 import config from './config';
-import { getWebpackConfig, runCompiler, WebpackConfig } from './builder/builderWebpackInterface';
+import { getWebpackConfig, runCompiler } from './builder/builderWebpackInterface';
 
 
 const WORKER_PATH = path.resolve(__dirname, './builder/builderWorker.js');
