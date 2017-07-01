@@ -338,8 +338,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   resolveExtensions.push('.tsx');
   conf.loader('ts', {
     test: /\.tsx?$/,
-    exclude: /node_modules/,
-    // loader: tsLoaderString
+    // exclude: /node_modules/,
     use: [
       babelLoader,
       {
@@ -444,10 +443,11 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   }
 
   if (options.backendBuild) {
-    conf.plugin('sourceMapSupport', webpack.BannerPlugin, [
-      'require("source-map-support").install();',
-      { raw: true, entryOnly: false }
-    ]);
+    conf.plugin('sourceMapSupport', webpack.BannerPlugin, [{
+      banner: 'require("source-map-support").install();',
+      raw: true,
+      entryOnly: false
+    }]);
   }
 
   if (options.useCircularDependencyPlugin) {

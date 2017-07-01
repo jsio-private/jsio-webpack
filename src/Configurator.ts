@@ -20,8 +20,8 @@ export interface WebpackConfig extends Configuration {
 
 
 type PluginDefinition = {
-  pluginConstructor: new (...args: any[]) => Plugin;
   name: string;
+  pluginConstructor: new (...args: any[]) => Plugin;
   params?: any[];
 };
 
@@ -84,6 +84,20 @@ export default class Configurator {
       name: name,
       rule: rule
     };
+  }
+
+  public modifyLoader(
+    name: string,
+    fn: (current: NewRule) => NewRule
+  ): void {
+    this.log('modifyLoader:', name);
+    const ruleDefinition: RuleDefinition = this.ruleDefinitions[name];
+    const newRule: NewRule = fn(ruleDefinition.rule);
+    this.log('> newRule=', newRule);
+    if (!newRule) {
+      return;
+    }
+    ruleDefinition.rule = newRule;
   }
 
   public removeLoader(name: string): void {

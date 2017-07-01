@@ -9,7 +9,7 @@ import { getWebpackConfig } from '../builder/builderWebpackInterface';
 import config from '../config';
 
 
-const runKarma = function () {
+export const runKarma = function () {
   // First we need to generate a webpack config for this build
   const preprocessorKeys = {};
   config.karma.preprocessorKeys.split(',').forEach(preprocessorKey => {
@@ -179,9 +179,4 @@ const runKarma = function () {
       server.start();
     });
   });
-};
-
-
-module.exports = {
-  runKarma: runKarma
 };

@@ -12,15 +12,15 @@ import installLibsUtils from './utils';
 
 const log = debug('jsio-webpack:installLibs');
 
-const ERRORS = {
+export const ERRORS = {
   MISSING_LIB_DIR: 'MISSING_LIB_DIR',
   LIB_IS_DIRTY: 'LIB_IS_DIRTY'
 };
 
 
-const updateGitSubmodules = function (
-  cwd
-) {
+const updateGitSubmodules = function(
+  cwd: string
+): Promise<void> {
   console.log('\nUpdating git submodules...\n');
   return Promise.resolve().then(() => {
     return utils.runChildProcess('git', ['diff', '--quiet', 'HEAD'], { cwd })
@@ -54,7 +54,7 @@ const updateGitSubmodules = function (
 };
 
 
-const run = function () {
+export const run = function(): Promise<void> {
   let projectDir;
   return Promise.resolve().then(() => {
     projectDir = process.env.PWD;
@@ -95,10 +95,4 @@ const run = function () {
     console.error(err.stack);
     process.exit(1);
   });
-};
-
-
-module.exports = {
-  run: run,
-  ERRORS: ERRORS
 };

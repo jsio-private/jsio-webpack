@@ -1,11 +1,11 @@
 import webpack from 'webpack';
 
-import builderWebpackInterface from './builder/builderWebpackInterface';
-import persistentRunner from './persistentRunner/index';
+import * as builderWebpackInterface from './builder/builderWebpackInterface';
+import * as persistentRunner from './persistentRunner/index';
 import compilerLogger from './compilerLogger';
 import config from './config';
-import installLibs from './installLibs/index';
-import karmaIntegration from './karmaIntegration/index';
+import * as installLibs from './installLibs/index';
+import * as karmaIntegration from './karmaIntegration/index';
 
 
 export {

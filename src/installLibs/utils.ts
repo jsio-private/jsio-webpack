@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import debug from 'debug';
 import Promise from 'bluebird';
 
-import utils from '../utils';
+import { getDirectories } from '../utils';
 
 
 const log = debug('jsio-webpack:installLibs:utils');
@@ -28,7 +28,7 @@ export const getLibDirs = function(
       if (!fs.existsSync(libDir)) {
         return [];
       }
-      const dirs: string[] = utils.getDirectories(libDir);
+      const dirs: string[] = getDirectories(libDir);
       log('> > Checking dirs:', libDir, dirs);
       return Promise.map(dirs, (dir: string) => {
         const moduleDir = path.join(libDir, dir);
