@@ -16,7 +16,7 @@ export type MultiConfOptions = {
   useBase64FontLoader: boolean;
   useReactHot: boolean;
   backendBuild: boolean;
-  devtool: string;
+  devtool: string|false;
   useCircularDependencyPlugin: boolean;
   useNotifications: boolean;
   useJsonSchema: boolean;
@@ -63,7 +63,7 @@ export default class MultiConf {
       useNotifications: false,
       useJsonSchema: false,
       useShaders: false,
-      devtool: null,
+      devtool: false,
       es2015: 'default',
       useGitRevisionPlugin: 'never',
       useVisualizerPlugin: false,

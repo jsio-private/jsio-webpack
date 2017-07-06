@@ -207,6 +207,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     }
 
     // If the user wants, forward one, otherwise no devtool
+    console.log('options.devtool=', options.devtool);
     current.devtool = <any>options.devtool;
 
     if (options.backendBuild) {
