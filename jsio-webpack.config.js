@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-const jsioWebpack = require('jsio-webpack-v0');
+const jsioWebpack = require('@blackstormlabs/jsio-webpack-v0');
 const webpack = jsioWebpack.webpack;
 
 
