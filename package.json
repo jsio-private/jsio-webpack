@@ -5,6 +5,14 @@
     "jsio-webpack-v0": "./bin/jsio-webpack.js"
   },
   "main": "./src/index.js",
+  "scripts":{
+    "test": "echo 'No tests'",
+    "np-publish": "np --any-branch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jsio-private/jsio-webpack"
+  },
   "dependencies": {
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
