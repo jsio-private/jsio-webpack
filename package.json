@@ -1,12 +1,18 @@
 {
-  "name": "jsio-webpack-v1",
+  "name": "@blackstormlabs/jsio-webpack-v1",
   "version": "1.0.0",
   "bin": {
     "jsio-webpack-v1": "./bin/jsio-webpack.js"
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "watch": "jsio-webpack-v0 --env development --watch"
+    "watch": "jsio-webpack-v0 --env development --watch",
+    "test": "echo 'No tests'",
+    "np-publish": "np --any-branch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jsio-private/jsio-webpack"
   },
   "main": "./dist/jsioWebpack.js",
   "dependencies": {
