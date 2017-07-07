@@ -1,11 +1,11 @@
 {
   "name": "@blackstormlabs/jsio-webpack-v0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "bin": {
     "jsio-webpack-v0": "./bin/jsio-webpack.js"
   },
   "main": "./src/index.js",
-  "scripts":{
+  "scripts": {
     "test": "echo 'No tests'",
     "np-publish": "np --any-branch"
   },
