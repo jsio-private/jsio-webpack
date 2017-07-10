@@ -311,13 +311,22 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
 
   const babelPresets = [];
   if (options.es2015 === 'default') {
-    babelPresets.push(['babel-preset-es2015', { loose: true }]);
+    babelPresets.push(['babel-preset-es2015', {
+      loose: true,
+      modules: false
+    }]);
   } else if (options.es2015 === 'without-strict') {
     babelPresets.push('babel-preset-es2015-without-strict');
   } else {
     throw new Error(`Unknown es2015 value: ${options.es2015}`);
   }
-  babelPresets.push('babel-preset-react');
+
+  if (options.useJSX) {
+    babelPresets.push('babel-preset-react');
+  }
+
+  // TODO: Add babelPresets.push('babel-preset-babili')
+
   const resolvedBabelPresets = babelPresets.map(resolveBabelPresets);
 
   const babelPlugins = [
@@ -363,7 +372,11 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
           // awesome-typescript-loader specific
           useBabel: true,
           useCache: true,
-          babelCore: babelCoreDir
+          babelCore: babelCoreDir,
+          reportFiles: [
+            'src/*.{ts,tsx}',
+            'src/**/*.{ts,tsx}'
+          ]
         }
       };
       conf.plugin('atl-CheckerPlugin', CheckerPlugin, []);
