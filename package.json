@@ -7,7 +7,9 @@
   "scripts": {
     "clean": "rm -rf dist",
     "watch": "jsio-webpack-v0 --env development --watch",
+    "build": "jsio-webpack-v0 --env production",
     "test": "echo 'No tests'",
+    "prepublish": "npm run clean && npm run build",
     "np-publish": "np --any-branch"
   },
   "repository": {
