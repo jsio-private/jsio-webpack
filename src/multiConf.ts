@@ -13,6 +13,7 @@ export type MultiConfOptions = {
   useStylus: boolean;
   useStylusExtractText: boolean;
   useVendorChunk: boolean;
+  useFonts: boolean;
   useBase64FontLoader: boolean;
   useReactHot: boolean;
   backendBuild: boolean;
@@ -33,7 +34,10 @@ export type MultiConfOptions = {
   useModuleAliases: boolean;
   envWhitelist: string[];
   flatProcessEnv: true,
-  ifdefOpts: { [key: string]: any; }
+  ifdefOpts: { [key: string]: any; },
+  useTypescript: boolean;
+  tsLoader: 'awesome-typescript-loader'|'ts-loader';
+  useJSX: boolean;
 };
 
 
@@ -53,10 +57,25 @@ export default class MultiConf {
     this.configurator = new Configurator();
 
     this.options = {
-      useStylus: true,
+      // Stylus
+      useStylus: false,
       useStylusExtractText: false,
-      useVendorChunk: false,
+      // Fonts
+      useFonts: false,
       useBase64FontLoader: false,
+      // Typescript
+      useTypescript: true,
+      tsLoader: 'awesome-typescript-loader',
+      typescriptIgnoreDiagnostics: [
+        // Module 'xxx' has no default export.
+        1192,
+        // Module 'xxx' has no exported member 'default'.
+        2305,
+        // Cannot find module
+        2307
+      ],
+      // Misc
+      useVendorChunk: false,
       useReactHot: false,
       backendBuild: false,
       useCircularDependencyPlugin: false,
@@ -67,14 +86,6 @@ export default class MultiConf {
       es2015: 'default',
       useGitRevisionPlugin: 'never',
       useVisualizerPlugin: false,
-      typescriptIgnoreDiagnostics: [
-        // Module 'xxx' has no default export.
-        1192,
-        // Module 'xxx' has no exported member 'default'.
-        2305,
-        // Cannot find module
-        2307
-      ],
       nodeExternalsOpts: {
         modulesFromFile: true,
         whitelist: []
@@ -83,7 +94,8 @@ export default class MultiConf {
       useModuleAliases: false,
       envWhitelist: [],
       flatProcessEnv: true,
-      ifdefOpts: {}
+      ifdefOpts: {},
+      useJSX: false
     };
   }
 

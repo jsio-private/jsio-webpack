@@ -327,6 +327,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   }
   const resolvedBabelPlugins = babelPlugins.map(resolveBabelPresets);
 
+
   let babelLoader = {
     loader: 'babel-loader',
     options: {
@@ -335,28 +336,55 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     }
   };
 
-  resolveExtensions.push('.ts');
-  resolveExtensions.push('.tsx');
-  conf.loader('ts', {
-    test: /\.tsx?$/,
-    // exclude: /node_modules/,
-    use: [
-      babelLoader,
-      {
+  if (options.useTypescript) {
+    resolveExtensions.push('.ts');
+    if (options.useJSX) {
+      resolveExtensions.push('.tsx');
+    }
+
+    let typescriptLoader;
+    if (options.tsLoader === 'ts-loader') {
+      typescriptLoader = {
         loader: 'ts-loader',
         options: {
           visualStudioErrorFormat: true,
           ignoreDiagnostics: options.typescriptIgnoreDiagnostics
         }
-      },
-      ifdefLoader
-    ]
-  });
+      };
+    } else if (options.tsLoader === 'awesome-typescript-loader') {
+      const babelCoreDir = dynamicRequire.resolve('babel-core');
+      typescriptLoader = {
+        loader: 'awesome-typescript-loader',
+        options: {
+          visualStudioErrorFormat: true,
+          ignoreDiagnostics: options.typescriptIgnoreDiagnostics,
+          // awesome-typescript-loader specific
+          useBabel: true,
+          useCache: true,
+          babelCore: babelCoreDir
+        }
+      };
+    } else {
+      throw new Error(`Unknown options.tsLoader: "${options.tsLoader}"`);
+    }
+
+    conf.loader('ts', {
+      test: options.useJSX ? /\.tsx?$/ : /\.ts$/,
+      // exclude: /node_modules/,
+      use: [
+        babelLoader,
+        typescriptLoader,
+        ifdefLoader
+      ]
+    });
+  }
 
   resolveExtensions.push('.js');
-  resolveExtensions.push('.jsx');
+  if (options.useJSX) {
+    resolveExtensions.push('.jsx');
+  }
   conf.loader('babel', {
-    test: /\.jsx?$/,
+    test: options.useJSX ? /\.jsx?$/ : /\.js$/,
     // include: path.join(__dirname, 'src'),
     exclude: /(node_modules)/,
     use: [
@@ -390,26 +418,28 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     });
   }
 
-  if (options.useBase64FontLoader) {
-    conf.loader('base64Fonts', {
-      test: /\.(eot|svg|ttf|woff|woff2|otf)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: 'base64-font-loader'
-    });
-  } else {
-    conf.loader('ttf', {
-      test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      loader: 'file-loader'
-    })
-    conf.loader('woff', {
-      test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-      use: [{
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          mimetype: 'application/font-woff'
-        }
-      }]
-    });
+  if (options.useFonts) {
+    if (options.useBase64FontLoader) {
+      conf.loader('base64Fonts', {
+        test: /\.(eot|svg|ttf|woff|woff2|otf)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: 'base64-font-loader'
+      });
+    } else {
+      conf.loader('ttf', {
+        test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: 'file-loader'
+      })
+      conf.loader('woff', {
+        test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            mimetype: 'application/font-woff'
+          }
+        }]
+      });
+    }
   }
 
   // PLUGINS

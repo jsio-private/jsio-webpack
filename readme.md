@@ -92,6 +92,11 @@ This only effects production builds.  The ExtractTextPlugin is used to move all 
 This will cause all imported files from `node_modules` to be included in a separate `vendor` chunk.
 
 
+#### `useFonts`
+
+Default: `false`
+
+
 #### `useBase64FontLoader`
 
 Uses [base64-font-loader](https://www.npmjs.com/package/base64-font-loader) to inline fonts.
@@ -136,6 +141,22 @@ Can be any of the following:
 | `'default'` | [babel-preset-es2015](https://www.npmjs.com/package/babel-preset-es2015) |
 | `'without-strict'` | [babel-preset-es2015-without-strict](https://www.npmjs.com/package/babel-preset-es2015-without-strict) |
 
+
+#### `useJSX`
+
+Default: `false`
+
+
+#### `useTypescript`
+
+Default: `true`
+
+
+#### `tsLoader`
+
+Default: `'awesome-typescript-loader'`
+
+`awesome-typescript-loader` provides faster compiles with multi-process type checking.  `ts-loader` is the more official option.
 
 
 #### `typescriptIgnoreDiagnostics`

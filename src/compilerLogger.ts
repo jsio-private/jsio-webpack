@@ -28,9 +28,35 @@ const handleWarnings = (warnings: any[]) => {
 };
 
 
-const successfullyCompiled = function(stats) {
+export const DETAIL_LEVEL = {
+  NONE: 0,
+  NORMAL: 1,
+  DETAILS: 2,
+  MORE_DETAILS: 3
+};
+
+
+const successfullyCompiled = function(
+  stats,
+  detailLevel: number = 0
+) {
   console.log('Stats:');
-  console.log(stats.toString({ colors: true }));
+  const toStringOptions = {
+    colors: false,
+    maxModules: 15,
+    usedExports: false
+  };
+  if (detailLevel >= DETAIL_LEVEL.NORMAL) {
+    toStringOptions.colors = true;
+  }
+  if (detailLevel >= DETAIL_LEVEL.DETAILS) {
+    toStringOptions.maxModules = 100;
+  }
+  if (detailLevel >= DETAIL_LEVEL.MORE_DETAILS) {
+    toStringOptions.maxModules = 1000;
+    toStringOptions.usedExports = true;
+  }
+  console.log(stats.toString(toStringOptions));
 };
 
 
@@ -40,7 +66,10 @@ const pprintStats = function(stats: any|any[]) {
     stats.stats.forEach(pprintStats);
     return;
   }
-  successfullyCompiled(stats);
+  successfullyCompiled(
+    stats,
+    process.env.NODE_ENV === 'production' ? DETAIL_LEVEL.MORE_DETAILS : DETAIL_LEVEL.NORMAL
+  );
 
   // const compilation = stats.compilation;
   // if (stats.hasErrors()) {
