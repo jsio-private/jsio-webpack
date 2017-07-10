@@ -64,7 +64,7 @@ let arg = yargs
       .help('help');
     config.isKarma = true;
   })
-  .command('install-libs', '', (yargs2) => {
+  .command('install-libs', 'Install submodules in lib/', (yargs2) => {
     arg = yargs2
       .option('s', {
         alias: 'submodules',
@@ -74,6 +74,17 @@ let arg = yargs
       })
       .help('help');
     config.isInstallLibs = true;
+  })
+  .command('build-dts', 'Generate a single .d.ts bundle for the project.', (yargs2) => {
+    arg = yargs2
+      .option('e', {
+        alias: 'entrypoint',
+        description: 'The entrypoint to start generating typescript definitions from.  Relative path from project directory.',
+        type: 'string',
+        default: config.buildDTS.entrypoint
+      })
+      .help('help');
+    config.isBuildDTS = true;
   })
   .help('help');
 const mainArgv = arg.argv;
@@ -102,6 +113,10 @@ if (config.isKarma) {
   config.installLibs.submodules = mainArgv.submodules;
   const installLibs = jsioWebpack.installLibs;
   installLibs.run();
+} else if (config.isBuildDTS) {
+  config.buildDTS.entrypoint = mainArgv.entrypoint;
+  const buildDTS = jsioWebpack.buildDTS;
+  buildDTS.run();
 } else {
   // Normal
   config.serve.useHMR = mainArgv.hot;

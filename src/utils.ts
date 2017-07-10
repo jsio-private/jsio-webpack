@@ -14,7 +14,16 @@ export const getDirectories = function(d: string): string[] {
 };
 
 
-export const runChildProcess = function(cmd, args, options): Promise<void> {
+export type RunChildProcessOptions = {
+  cwd: string;
+};
+
+
+export const runChildProcess = function(
+  cmd: string,
+  args: string[],
+  options: RunChildProcessOptions
+): Promise<void> {
   return Promise.resolve().then(() => {
     const prefix = chalk.gray('[spawn]');
     console.log(prefix, 'Spawning:', cmd, args, options);

@@ -30,5 +30,10 @@ export default {
   installLibs: {
     submodules: false
   },
-  enableChildProcess: false
+  enableChildProcess: false,
+  // bundle .d.ts
+  isBuildDTS: false,
+  buildDTS: {
+    entrypoint: 'src/index.ts'
+  }
 };

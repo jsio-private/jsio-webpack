@@ -6,6 +6,7 @@ import compilerLogger from './compilerLogger';
 import config from './config';
 import * as installLibs from './installLibs/index';
 import * as karmaIntegration from './karmaIntegration/index';
+import * as buildDTS from './typescript/buildDTS';
 
 
 export {
@@ -16,6 +17,7 @@ export {
   persistentRunner,
   compilerLogger,
   karmaIntegration,
+  buildDTS,
   // Libraries
   webpack
 };

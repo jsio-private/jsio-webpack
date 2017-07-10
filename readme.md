@@ -15,6 +15,7 @@ This is an example of what your `package.json` should contain (in relation to js
 {
   "scripts": {
     "build": "NODE_ENV=production jsio-webpack",
+    "build-dts": "jsio-webpack build-dts",
     "watch": "jsio-webpack --watch",
     "serve": "jsio-webpack serve --hot",
     "postinstall": "jsio-webpack install-libs --submodules"
@@ -276,11 +277,6 @@ Default: `true`
 Default behavior is to send whitelisted env vars as `'process.env.MY_VAR': '123'`, set to false to send `'process.env': {'MY_VAR': '123}`.
 
 
-### Subcommand: `install-libs`
-
-This will run `npm install` in all `lib/*` directories, if the directory has a `package.json`.  If your libs are git submodules, add the `--submodules` option to update and init submodules in your project first.
-
-
 #### `ifdefOpts`
 
 Adds loader: `ifdef-loader`
@@ -295,3 +291,15 @@ Example source code:
 console.log('MY_VAR is set')
 /// #endif
 ```
+
+
+
+### Subcommand: `install-libs`
+
+This will run `npm install` in all `lib/*` directories, if the directory has a `package.json`.  If your libs are git submodules, add the `--submodules` option to update and init submodules in your project first.
+
+
+
+### Subcommand: `build-dts`
+
+This will generate a single `dist/<library name>.d.ts` file.  First all individual `<file name>.d.ts` declaration files will be built to `dist/declarations/src/<file name>.d.ts` using the typescript compiler.  Then individual `.d.ts` files will be combined using `dts-bundle`.  Finally the `dist/declarations` directory is removed.
