@@ -18,8 +18,10 @@ import debug from 'debug';
 import nodeExternals from 'webpack-node-externals';
 import GitRevisionPlugin from 'git-revision-webpack-plugin';
 import Visualizer from 'webpack-visualizer-plugin';
+import { CheckerPlugin } from 'awesome-typescript-loader';
 
 import EncryptedBuildPlugin from 'encrypted-build-webpack-plugin';
+
 
 import config from '../config';
 import { getLibDirs } from '../installLibs/utils';
@@ -364,6 +366,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
           babelCore: babelCoreDir
         }
       };
+      conf.plugin('atl-CheckerPlugin', CheckerPlugin, []);
     } else {
       throw new Error(`Unknown options.tsLoader: "${options.tsLoader}"`);
     }

@@ -40,6 +40,7 @@ const successfullyCompiled = function(
   stats,
   detailLevel: number = 0
 ) {
+  // See: https://webpack.js.org/configuration/stats/
   console.log('Stats:');
   const toStringOptions = {
     colors: false,
