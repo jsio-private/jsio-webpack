@@ -28,7 +28,8 @@ const buildDeclarations = function(
       '--declarationDir', declarationDir,
       '--declaration', 'true',
       '--allowJs', 'false',
-      '--project', projectDir
+      '--project', projectDir,
+      '--rootDir', projectDir
     ], { cwd: projectDir })
     .catch((error: Error) => {
       // Ignore error code 2, throws all the time, we are doing janky stuff anyways
@@ -60,15 +61,17 @@ export const bundleDefinitions = function(
       renamedEntryFile
     );
     const outPath: string = path.join(outDir, `${packageNameNoScope}.d.ts`);
-    dts.bundle({
+    const mainPath: string = path.join(declarationDir, renamedEntryPath);
+    const dtsConfig = {
       name: packageName,
-      main: path.join(declarationDir, renamedEntryPath),
+      main: mainPath,
       out: outPath,
       baseDir: declarationDir
       // Note: Cannot use this, will cause naming collisions given `src/a export Z` and `src/b export Z`
       // outputAsModuleFolder: true
-    });
-
+    };
+    log('> dtsConfig=', dtsConfig);
+    dts.bundle(dtsConfig);
     return outPath;
   });
 };
