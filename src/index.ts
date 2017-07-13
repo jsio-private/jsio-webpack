@@ -7,7 +7,8 @@ import config from './config';
 import * as installLibs from './installLibs/index';
 import * as karmaIntegration from './karmaIntegration/index';
 import * as buildDTS from './typescript/buildDTS';
-
+// import { DLLDedupePlugin } from '@blackstormlabs/webpack-dll-dedupe-plugin';
+const DLLDedupePlugin = null;
 
 export {
   // Exports
@@ -18,6 +19,7 @@ export {
   compilerLogger,
   karmaIntegration,
   buildDTS,
+  DLLDedupePlugin,
   // Libraries
   webpack
 };

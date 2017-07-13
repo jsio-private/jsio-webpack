@@ -129,8 +129,9 @@ export default class Configurator {
     this.log('resolve');
     this.log('> Building plugin instances');
     this.config.plugins = [];
-    _.forEach(this.pluginDefinitions, (pluginDefinition: PluginDefinition) => {
-      this.log('> creating new plugin instance:', pluginDefinition.name, pluginDefinition.pluginConstructor.name);
+    _.forEach(this.pluginDefinitions, (pluginDefinition: PluginDefinition, name: string) => {
+      this.log('> creating new plugin instance:', name);
+      this.log('> > constructor: ', pluginDefinition.pluginConstructor.name);
       const plugin: Plugin = new pluginDefinition.pluginConstructor(...pluginDefinition.params);
       this.config.plugins.push(plugin);
     });
