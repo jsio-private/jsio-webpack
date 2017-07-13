@@ -375,6 +375,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
           useBabel: true,
           useCache: true,
           babelCore: babelCoreDir,
+          cacheDirectory: path.resolve(pwd, 'node_modules', '.cache', 'awesome-typescript-loader', 'awcache'),
           reportFiles: [
             'src/*.{ts,tsx}',
             'src/**/*.{ts,tsx}'
