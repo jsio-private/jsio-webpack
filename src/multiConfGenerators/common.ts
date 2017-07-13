@@ -237,12 +237,14 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   });
 
   // PRELOADERS
-  conf.loader('eslint', {
-    test: /\.jsx?$/,
-    exclude: /(node_modules)/,
-    loader: 'eslint-loader',
-    enforce: 'pre'
-  });
+  if (options.useEsLint) {
+    conf.loader('eslint', {
+      test: /\.jsx?$/,
+      exclude: /(node_modules)/,
+      loader: 'eslint-loader',
+      enforce: 'pre'
+    });
+  }
 
   // TODO: stylint loader is no longer maintained: https://github.com/guerrero/stylint-loader/issues/9
   // current.stylint = {
