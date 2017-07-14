@@ -18,7 +18,7 @@ const log: Function = debug('jsio-webpack:builderWebpackInterface');
 
 const printConfig = (title, data) => {
   console.log(title);
-  console.log(util.inspect(data, { colors: true, depth: 5 }));
+  console.log(util.inspect(data, { colors: true, depth: 10 }));
   console.log('');
 };
 

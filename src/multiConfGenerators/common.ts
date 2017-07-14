@@ -343,7 +343,8 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     loader: 'babel-loader',
     options: {
       presets: resolvedBabelPresets,
-      plugins: resolvedBabelPlugins
+      plugins: resolvedBabelPlugins,
+      cacheDirectory: true
     }
   };
 
