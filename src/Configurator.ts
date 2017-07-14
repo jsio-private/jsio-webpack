@@ -1,5 +1,7 @@
+import path from 'path';
 import _ from 'lodash';
 import debug from 'debug';
+import globToRegExp from 'glob-to-regexp';
 import {
   Configuration,
   Rule,
@@ -8,7 +10,8 @@ import {
   NewResolve,
   NewResolveLoader,
   NewModule,
-  Plugin
+  Plugin,
+  Condition
 } from 'webpack';
 
 
@@ -33,6 +36,9 @@ type RuleDefinition = {
   name: string;
   rule: NewRule;
 };
+
+
+export const GLOB_IDENTIFIER: string = 'glob:';
 
 
 export default class Configurator {
@@ -103,6 +109,37 @@ export default class Configurator {
   public removeLoader(name: string): void {
     this.log('removeLoader:', name);
     delete this.ruleDefinitions[name];
+  }
+
+  /** Any string Condition will be interpreted as a relative glob from the project directory. */
+  public addLoaderInclude(name: string, items: Condition): void;
+  public addLoaderInclude(
+    name: string,
+    items: Condition[]
+  ): void {
+    const pwd = path.resolve(process.cwd());
+    if (!Array.isArray(items)) {
+      items = [items];
+    }
+    this.modifyLoader(name, (existing) => {
+      if (!existing.include) {
+        existing.include = [];
+      } else if (!Array.isArray(existing.include)) {
+        existing.include = [existing.include];
+      }
+      for (let i = 0; i < items.length; i++) {
+        let item: Condition = items[i];
+        // Interpret strings as globs relative to project directory
+        if (typeof item === 'string' && item.indexOf(GLOB_IDENTIFIER) === 0) {
+          item = globToRegExp(
+            pwd + path.sep + item.substring(GLOB_IDENTIFIER.length),
+            { globstar: true }
+          );
+        }
+        existing.include.push(item);
+      }
+      return existing;
+    });
   }
 
   public plugin(

@@ -47,6 +47,7 @@
     "fs-extra": "^1.0.0",
     "git-revision-webpack-plugin": "^2.4.0",
     "git-state": "^3.1.0",
+    "glob-to-regexp": "^0.3.0",
     "glsl-template-loader": "git+https://github.com/jsio-private/glsl-template-loader#0c1b2cbaa6b1020de78527b37dcd2ce51a5e89bc",
     "html-webpack-plugin": "^2.22.0",
     "ifdef-loader": "git+https://github.com/BlackstormLabs/ifdef-loader#master",

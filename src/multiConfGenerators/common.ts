@@ -238,10 +238,10 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   if (options.useEsLint) {
     conf.loader('eslint', {
       test: /\.jsx?$/,
-      exclude: /(node_modules)/,
       loader: 'eslint-loader',
       enforce: 'pre'
     });
+    conf.addLoaderInclude('eslint', 'glob:src/**');
   }
 
   // TODO: stylint loader is no longer maintained: https://github.com/guerrero/stylint-loader/issues/9
@@ -388,7 +388,6 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
 
     conf.loader('ts', {
       test: options.useJSX ? /\.tsx?$/ : /\.ts$/,
-      // exclude: /node_modules/,
       use: [
         babelLoader,
         typescriptLoader,
@@ -403,13 +402,12 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   }
   conf.loader('babel', {
     test: options.useJSX ? /\.jsx?$/ : /\.js$/,
-    // include: path.join(__dirname, 'src'),
-    exclude: /(node_modules)/,
     use: [
       babelLoader,
       ifdefLoader
     ]
   });
+  conf.addLoaderInclude('babel', 'glob:src/**');
 
   conf.loader('dsv', {
     test: /\.(csv)$/,
