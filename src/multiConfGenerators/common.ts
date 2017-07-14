@@ -22,10 +22,8 @@ import { CheckerPlugin } from 'awesome-typescript-loader';
 
 import EncryptedBuildPlugin from 'encrypted-build-webpack-plugin';
 
-
 import config from '../config';
 import { getLibDirs } from '../installLibs/utils';
-
 import dynamicRequire from '../dynamicRequire';
 
 

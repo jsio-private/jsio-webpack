@@ -1,14 +1,20 @@
-import { ConfigFunction, Configurator, MultiConfOptions } from '../multiConf';
+import { ConfigFunction, MultiConfOptions } from '../multiConf';
+import Configurator from '../Configurator';
 import webpack from 'webpack';
+import BabiliPlugin from 'babili-webpack-plugin';
+import dynamicRequire from '../dynamicRequire';
+import babelCore from 'babel-core';
 
 
 const buildConfig: ConfigFunction = function(configurator: Configurator, options: MultiConfOptions) {
-  configurator.plugin('webpackUglify', webpack.optimize.UglifyJsPlugin, [{
+  configurator.plugin('babili', BabiliPlugin, [{
     mangle: {
-      keep_fnames: true
+      keepFnName: true,
+      keepClassName: true
     }
+  }, {
+    babel: babelCore
   }]);
-  configurator.plugin('webpackDedupe', webpack.optimize.DedupePlugin);
 };
 
 export default buildConfig;
