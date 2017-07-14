@@ -6,8 +6,8 @@ import debug from 'debug';
 import chalk from 'chalk';
 
 import config from '../config';
-import utils from '../utils';
-import installLibsUtils from './utils';
+import { getLibDirs } from './utils';
+import { runChildProcess } from '../utils';
 
 
 const log = debug('jsio-webpack:installLibs');
@@ -23,7 +23,7 @@ const updateGitSubmodules = function(
 ): Promise<void> {
   console.log('\nUpdating git submodules...\n');
   return Promise.resolve().then(() => {
-    return utils.runChildProcess('git', ['diff', '--quiet', 'HEAD'], { cwd })
+    return runChildProcess('git', ['diff', '--quiet', 'HEAD'], { cwd })
     .then(() => {
       return true;
     })
@@ -46,9 +46,9 @@ const updateGitSubmodules = function(
       return;
     }
 
-    return utils.runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd })
+    return runChildProcess('git', ['submodule', 'sync', '--recursive'], { cwd })
     .then(() => {
-      return utils.runChildProcess('git', ['submodule', 'update', '--init'], { cwd });
+      return runChildProcess('git', ['submodule', 'update', '--init'], { cwd });
     });
   });
 };
@@ -71,7 +71,7 @@ export const run = function(): Promise<void> {
   })
   .then(() => {
     // Find all libs (a fn exists somewhere...)
-    return installLibsUtils.getLibDirs(projectDir);
+    return getLibDirs(projectDir);
   })
   .then((libDirs) => {
     return Promise.map(libDirs, (libDir) => {
@@ -84,7 +84,7 @@ export const run = function(): Promise<void> {
       }
 
       console.log(`\nRunning npm install for: ${libDir.dir}\n`);
-      return utils.runChildProcess('npm', ['install'], { cwd: libDir.dir })
+      return runChildProcess('npm', ['install'], { cwd: libDir.dir })
     }, { concurrency: 1 });
   })
   .then(() => {
