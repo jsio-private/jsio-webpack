@@ -317,7 +317,8 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   if (options.es2015 === 'default') {
     babelPresets.push(['babel-preset-es2015', {
       loose: true,
-      modules: false
+      // modules: false
+      modules: undefined // Default
     }]);
   } else if (options.es2015 === 'without-strict') {
     babelPresets.push('babel-preset-es2015-without-strict');
