@@ -39,6 +39,7 @@ export type MultiConfOptions = {
   tsLoader: 'awesome-typescript-loader'|'ts-loader';
   useJSX: boolean;
   useEsLint: boolean;
+  useLodashIntegrations: boolean;
 };
 
 
@@ -97,7 +98,8 @@ export default class MultiConf {
       flatProcessEnv: true,
       ifdefOpts: {},
       useJSX: false,
-      useEsLint: false
+      useEsLint: false,
+      useLodashIntegrations: false
     };
   }
 

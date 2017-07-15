@@ -19,6 +19,7 @@ import nodeExternals from 'webpack-node-externals';
 import GitRevisionPlugin from 'git-revision-webpack-plugin';
 import Visualizer from 'webpack-visualizer-plugin';
 import { CheckerPlugin } from 'awesome-typescript-loader';
+import LodashModuleReplacementPlugin from 'lodash-webpack-plugin';
 
 import EncryptedBuildPlugin from 'encrypted-build-webpack-plugin';
 
@@ -328,6 +329,10 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     babelPresets.push('babel-preset-react');
   }
 
+  if (options.useLodashIntegrations) {
+    conf.plugin('LodashModuleReplacement', LodashModuleReplacementPlugin, []);
+  }
+
   // TODO: Add babelPresets.push('babel-preset-babili')
 
   const resolvedBabelPresets = babelPresets.map(resolveBabelPresets);
@@ -338,6 +343,9 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   ];
   if (options.useReactHot) {
     babelPlugins.push('react-hot-loader/babel');
+  }
+  if (options.useLodashIntegrations) {
+    babelPlugins.push('babel-plugin-lodash');
   }
   const resolvedBabelPlugins = babelPlugins.map(resolveBabelPresets);
 
