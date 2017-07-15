@@ -191,6 +191,9 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
       nodeModulesPath // jsio-webpack node_modules
     ];
 
+    // Resolve everything as production path, simpler to configure for
+    current.resolve.symlinks = false;
+
     // If jsio-webpack is installed as a dependency of the project being built,
     // ensure that all parent directories are also used when loking for loaders.
     // npm will install at the top most directory it can within a project
