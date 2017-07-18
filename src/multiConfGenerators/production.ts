@@ -1,19 +1,26 @@
 import { ConfigFunction, MultiConfOptions } from '../multiConf';
 import Configurator from '../Configurator';
 import webpack from 'webpack';
-import BabiliPlugin from 'babili-webpack-plugin';
-import dynamicRequire from '../dynamicRequire';
-import babelCore from 'babel-core';
+// import BabiliPlugin from 'babili-webpack-plugin';
+// import babelCore from 'babel-core';
 
 
 const buildConfig: ConfigFunction = function(configurator: Configurator, options: MultiConfOptions) {
-  configurator.plugin('babili', BabiliPlugin, [{
+  // TODO: Babili fails to mangle with a memory exception.  For now just use uglify.
+  // See: https://github.com/babel/babili/issues/332
+  // configurator.plugin('babili', BabiliPlugin, [{
+  //   mangle: {
+  //     keepFnName: true,
+  //     keepClassName: true
+  //   }
+  // }, {
+  //   babel: babelCore
+  // }]);
+
+  configurator.plugin('uglify', webpack.optimize.UglifyJsPlugin, [{
     mangle: {
-      keepFnName: true,
-      keepClassName: true
+      keep_fnames: true
     }
-  }, {
-    babel: babelCore
   }]);
 };
 

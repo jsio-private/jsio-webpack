@@ -334,8 +334,6 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     conf.plugin('LodashModuleReplacement', LodashModuleReplacementPlugin, []);
   }
 
-  // TODO: Add babelPresets.push('babel-preset-babili')
-
   const resolvedBabelPresets = babelPresets.map(resolveBabelPresets);
 
   const babelPlugins = [
