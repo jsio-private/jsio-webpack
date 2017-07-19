@@ -17,6 +17,9 @@ export type MultiConfOptions = {
   useBase64FontLoader: boolean;
   useReactHot: boolean;
   backendBuild: boolean;
+  backendOptions: {
+    useSourceMapSupport: boolean;
+  };
   devtool: string|false;
   useCircularDependencyPlugin: boolean;
   useNotifications: boolean;
@@ -80,6 +83,9 @@ export default class MultiConf {
       useVendorChunk: false,
       useReactHot: false,
       backendBuild: false,
+      backendOptions: {
+        useSourceMapSupport: true
+      },
       useCircularDependencyPlugin: false,
       useNotifications: false,
       useJsonSchema: false,

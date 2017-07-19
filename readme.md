@@ -112,7 +112,12 @@ Turns on [react-hot-loader](https://github.com/gaearon/react-hot-loader) for rea
 
 Builds your bundle to be used from command line with `node`.
 
-Make sure to install [source-map-support](https://github.com/evanw/node-source-map-support).
+
+#### `backendOptions.useSourceMapSupport`
+
+Default: `true`
+
+Make sure to install [source-map-support](https://github.com/evanw/node-source-map-support) with `npm install --save source-map-support`.
 
 
 #### `useCircularDependencyPlugin`
