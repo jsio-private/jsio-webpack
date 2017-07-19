@@ -1,6 +1,6 @@
 {
   "name": "@blackstormlabs/jsio-webpack-v1",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "bin": {
     "jsio-webpack-v1": "./bin/jsio-webpack.js"
   },
