@@ -469,10 +469,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   }
 
   // PLUGINS
-  const defines = {
-    NODE_ENV: config.env,
-    COMMITHASH: '<DISABLED>'
-  };
+  const defines: any = {};
 
   if (
     (
@@ -580,7 +577,11 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   // for proper error propagation
   let envWhitelist = {};
   return new Promise((resolve, reject) => {
-    addTowhitelist(envWhitelist, options.envWhitelist);
+    if (!options.envWhitelist) {
+      defines.NODE_ENV = defines.NODE_ENV || config.env;
+    } else if (!Array.isArray(options.envWhitelist) || options.envWhitelist.length > 0) {
+      addToWhitelist(envWhitelist, options.envWhitelist);
+    }
     // module aliases
     if (options.scanLibs) {
       return getModuleOpts(options, pwd)
@@ -594,7 +595,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
           });
         }
 
-        addTowhitelist(envWhitelist, moduleOpts.envWhitelist);
+        addToWhitelist(envWhitelist, moduleOpts.envWhitelist);
       })
       .then(() => {
         resolve();
@@ -626,7 +627,7 @@ export default buildConfig;
 
 
 /** Merges `envWhitelist`s */
-const addTowhitelist = function (
+const addToWhitelist = function (
   envWhitelistMain: { [key: string]: string; },
   envWhitelist: string[]|{ [key: string]: string; }
 ) {
@@ -637,7 +638,7 @@ const addTowhitelist = function (
     _.forEach(envWhitelist, (v: string, i: number) => {
       envWhitelistObject[v] = '';
     });
-    addTowhitelist(envWhitelistMain, envWhitelistObject);
+    addToWhitelist(envWhitelistMain, envWhitelistObject);
     return;
   }
 
