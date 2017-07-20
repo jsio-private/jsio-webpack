@@ -497,7 +497,13 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
 
   if (
     options.backendBuild
-    && options.backendOptions.useSourceMapSupport
+    && (
+      options.backendOptions.useSourceMapSupport === true
+      || (
+        options.backendOptions.useSourceMapSupport === 'development'
+        && config.env !== 'production'
+      )
+    )
   ) {
     conf.plugin('sourceMapSupport', webpack.BannerPlugin, [{
       banner: 'require("source-map-support").install();',

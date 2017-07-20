@@ -115,7 +115,13 @@ Builds your bundle to be used from command line with `node`.
 
 #### `backendOptions.useSourceMapSupport`
 
-Default: `true`
+Default: `'development'`
+
+Options:
+
+- `'development'` Include the sourcemap banner when `NODE_ENV !== 'production'`
+- `true` Include always
+- `false` Include never
 
 Make sure to install [source-map-support](https://github.com/evanw/node-source-map-support) with `npm install --save source-map-support`.
 

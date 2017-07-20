@@ -18,7 +18,7 @@ export type MultiConfOptions = {
   useReactHot: boolean;
   backendBuild: boolean;
   backendOptions: {
-    useSourceMapSupport: boolean;
+    useSourceMapSupport: boolean|'development';
   };
   devtool: string|false;
   useCircularDependencyPlugin: boolean;
@@ -84,7 +84,7 @@ export default class MultiConf {
       useReactHot: false,
       backendBuild: false,
       backendOptions: {
-        useSourceMapSupport: true
+        useSourceMapSupport: 'development'
       },
       useCircularDependencyPlugin: false,
       useNotifications: false,
