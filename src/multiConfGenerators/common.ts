@@ -211,8 +211,11 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     }
 
     // If the user wants, forward one, otherwise no devtool
-    console.log('options.devtool=', options.devtool);
-    current.devtool = <any>options.devtool;
+    if (options.devtool) {
+      current.devtool = <any>options.devtool;
+    } else {
+      current.devtool = false;
+    }
 
     if (options.backendBuild) {
       current.target = 'node';
@@ -220,20 +223,16 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
         current.externals = [];
       }
       (<any[]>current.externals).push(nodeExternals(options.nodeExternalsOpts));
-      // const importType = 'commonjs';
-      // current.externals.push(function (context, request, callback) {
-      //   const relativePath = path.relative(pwd, context);
-      //   if (relativePath.match(/^node_modules/)) {
-      //     console.log('Marking as external: context=', context, 'request=', request);
-      //     return callback(null, importType + ' ' + request);
-      //   }
-      //   callback();
-      // });
       current.node = {
         __dirname: false,
         __filename: false
       };
     }
+
+    // Bundle loader options
+    current.output = current.output || {};
+    current.output.filename = '[name].js';
+    current.output.chunkFilename = '[name]-[id].js';
 
     return current;
   });

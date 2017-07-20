@@ -67,7 +67,10 @@ const pprintStats = function(stats: any|any[]) {
     stats.stats.forEach(pprintStats);
     return;
   }
-  successfullyCompiled(stats, DETAIL_LEVEL.MORE_DETAILS);
+  const detailLevel: number = process.env.NODE_ENV === 'production'
+    ? DETAIL_LEVEL.MORE_DETAILS
+    : DETAIL_LEVEL.NORMAL;
+  successfullyCompiled(stats, detailLevel);
 
   // const compilation = stats.compilation;
   // if (stats.hasErrors()) {
