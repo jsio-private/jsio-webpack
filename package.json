@@ -6,11 +6,10 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "watch": "jsio-webpack-v0 --env development --watch",
-    "build": "jsio-webpack-v0 --env production",
+    "watch": "jsio-webpack-v1 --env development --watch",
+    "build": "jsio-webpack-v1 --env production",
     "test": "echo 'No tests'",
-    "version": "npm run clean && npm run build",
-    "np-publish": "np --any-branch"
+    "version": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
@@ -98,7 +97,7 @@
     "extends": "jsio"
   },
   "devDependencies": {
-    "@blackstormlabs/jsio-webpack-v0": "=0.0.2",
+    "@blackstormlabs/jsio-webpack-v1": "^1.2.0",
     "@types/fs-extra": "0.0.36",
     "@types/karma-coverage": "^0.5.30",
     "@types/mocha": "^2.2.35",

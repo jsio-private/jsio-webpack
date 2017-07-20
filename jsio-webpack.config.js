@@ -1,7 +1,6 @@
 'use strict';
 const path = require('path');
-const jsioWebpack = require('@blackstormlabs/jsio-webpack-v0');
-const webpack = jsioWebpack.webpack;
+// const jsioWebpack = require('@blackstormlabs/jsio-webpack-v1');
 
 
 const mainConfigure = function (configurator, options) {
@@ -35,9 +34,7 @@ const mainConfigure = function (configurator, options) {
 };
 
 
-const mainPostConfigure = function (configurator, options) {
-  configurator.removePreLoader('eslint');
-};
+const mainPostConfigure = function (configurator, options) {};
 
 
 const mainConf = {
