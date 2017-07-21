@@ -182,15 +182,14 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   // BASE CONFIG
   conf.merge((current: WebpackConfig) => {
     current.resolve = current.resolve || {};
-    const nodeModulesPath = path.resolve(__dirname, '..', 'node_modules');
-    // TODO: what is this in webpack v2?
-    // current.resolve.fallback = nodeModulesPath;
     current.resolveLoader = current.resolveLoader || {};
 
-    current.resolve.modules = current.resolveLoader.modules = [
+    const nodeModulesPath = path.resolve(__dirname, '..', 'node_modules');
+    current.resolve.modules = [
       path.join(pwd, 'node_modules'), // Project node_modules
       nodeModulesPath // jsio-webpack node_modules
     ];
+    current.resolveLoader.modules = [].concat(current.resolve.modules);
 
     // Resolve everything as production path, simpler to configure for
     current.resolve.symlinks = false;
