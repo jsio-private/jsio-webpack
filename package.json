@@ -34,7 +34,7 @@
     "child-process-promise": "^2.2.0",
     "circular-dependency-plugin": "^2.0.0",
     "css-loader": "^0.24.0",
-    "dsv-loader": "git+https://github.com/BlackstormLabs/dsv-loader.git",
+    "dsv-loader": "git+https://github.com/BlackstormLabs/dsv-loader.git#6d44e7ffa5b961cab1c1f15bf29c86c3d24dffac",
     "dts-bundle": "^0.7.3",
     "encrypted-build-webpack-plugin": "git+https://github.com/jsio-private/encrypted-build-webpack-plugin.git",
     "eslint": "^3.3.1",
