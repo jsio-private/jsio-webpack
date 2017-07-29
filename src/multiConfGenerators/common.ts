@@ -1,3 +1,4 @@
+import { getLinkedModules } from '../utils';
 import { default as Configurator, WebpackConfig } from '../Configurator';
 import { ConfigFunction, MultiConfOptions } from '../multiConf';
 import path from 'path';
@@ -189,6 +190,22 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
       path.join(pwd, 'node_modules'), // Project node_modules
       nodeModulesPath // jsio-webpack node_modules
     ];
+
+    // All symlinked node_modules, if there are any.  Makes development easier.
+    const linkedModuleDirs: string[] = getLinkedModules(pwd);
+    if (linkedModuleDirs.length > 0) {
+      if (process.env.NODE_ENV === 'production') {
+        console.warn('\n', chalk.yellow(
+          'Warning: linked modules detected during a production build.'
+          + '  Do you know what you are doing?'
+          + '  Are the node_modules the modules you expect?'
+        ), '\n');
+      }
+      current.resolve.modules = current.resolve.modules.concat(
+        linkedModuleDirs.map(dir => path.join(dir, 'node_modules'))
+      );
+    }
+
     current.resolveLoader.modules = [].concat(current.resolve.modules);
 
     // Resolve everything as production path, simpler to configure for
