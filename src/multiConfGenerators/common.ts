@@ -147,7 +147,7 @@ type ModuleOpts = {
 
 
 const getModuleOpts = function(options: MultiConfOptions, projectDir: string): Promise<ModuleOpts> {
-  console.log('\n' + chalk.green('Getting module aliases...') + '\n');
+  console.log('\n' + chalk.green('Scanning node_modules...') + '\n');
   const moduleOpts: ModuleOpts = {
     aliases: {},
     envWhitelist: {}
