@@ -512,13 +512,11 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   }
 
   if (
-    options.backendBuild
-    && (
-      options.backendOptions.useSourceMapSupport === true
-      || (
-        options.backendOptions.useSourceMapSupport === 'development'
-        && config.env !== 'production'
-      )
+    options.backendOptions.useSourceMapSupport === true
+    || (
+      options.backendBuild
+      && options.backendOptions.useSourceMapSupport === 'development'
+      && config.env !== 'production'
     )
   ) {
     conf.plugin('sourceMapSupport', webpack.BannerPlugin, [{
