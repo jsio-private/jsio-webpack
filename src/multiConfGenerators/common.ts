@@ -235,14 +235,17 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
 
     if (options.backendBuild) {
       current.target = 'node';
-      if (!current.externals) {
-        current.externals = [];
-      }
-      (<any[]>current.externals).push(nodeExternals(options.nodeExternalsOpts));
       current.node = {
         __dirname: false,
         __filename: false
       };
+
+      if (options.backendOptions.useNodeExternals) {
+        if (!current.externals) {
+          current.externals = [];
+        }
+        (<any[]>current.externals).push(nodeExternals(options.nodeExternalsOpts));
+      }
     }
 
     // Bundle loader options
@@ -432,7 +435,9 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
       ifdefLoader
     ]
   });
+
   conf.addLoaderInclude('babel', 'glob:src/**');
+  conf.addLoaderInclude('ts', 'glob:src/**');
 
   conf.loader('dsv', {
     test: /\.(csv)$/,
