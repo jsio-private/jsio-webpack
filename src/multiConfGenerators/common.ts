@@ -456,7 +456,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
         loader: 'file-loader',
         options: {
           name: '[name].[hash].[ext]',
-          outputPath: path.join('files', name)
+          outputPath: path.join('files', name) + path.sep
         }
       }
     });
