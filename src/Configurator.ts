@@ -98,6 +98,9 @@ export default class Configurator {
   ): void {
     this.log('modifyLoader:', name);
     const ruleDefinition: RuleDefinition = this.ruleDefinitions[name];
+    if (!ruleDefinition) {
+      throw new Error(`Unknown rule definition name "${name}"`);
+    }
     const newRule: NewRule = fn(ruleDefinition.rule);
     this.log('> newRule=', newRule);
     if (!newRule) {
@@ -112,34 +115,38 @@ export default class Configurator {
   }
 
   /** Any string Condition will be interpreted as a relative glob from the project directory. */
-  public addLoaderInclude(name: string, items: Condition): void;
   public addLoaderInclude(
-    name: string,
-    items: Condition[]
+    names: string[]|string,
+    items: Condition[]|Condition
   ): void {
     const pwd = path.resolve(process.cwd());
     if (!Array.isArray(items)) {
       items = [items];
     }
-    this.modifyLoader(name, (existing) => {
-      if (!existing.include) {
-        existing.include = [];
-      } else if (!Array.isArray(existing.include)) {
-        existing.include = [existing.include];
-      }
-      for (let i = 0; i < items.length; i++) {
-        let item: Condition = items[i];
-        // Interpret strings as globs relative to project directory
-        if (typeof item === 'string' && item.indexOf(GLOB_IDENTIFIER) === 0) {
-          item = globToRegExp(
-            pwd + path.sep + item.substring(GLOB_IDENTIFIER.length),
-            { globstar: true }
-          );
+    if (!Array.isArray(names)) {
+      names = [names];
+    }
+    for (const name of names) {
+      this.modifyLoader(name, (existing) => {
+        if (!existing.include) {
+          existing.include = [];
+        } else if (!Array.isArray(existing.include)) {
+          existing.include = [existing.include];
         }
-        existing.include.push(item);
-      }
-      return existing;
-    });
+        for (let i = 0; i < (<Condition[]>items).length; i++) {
+          let item: Condition = items[i];
+          // Interpret strings as globs relative to project directory
+          if (typeof item === 'string' && item.indexOf(GLOB_IDENTIFIER) === 0) {
+            item = globToRegExp(
+              pwd + path.sep + item.substring(GLOB_IDENTIFIER.length),
+              { globstar: true }
+            );
+          }
+          existing.include.push(item);
+        }
+        return existing;
+      });
+    }
   }
 
   public plugin(

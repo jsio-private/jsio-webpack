@@ -436,8 +436,7 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     ]
   });
 
-  conf.addLoaderInclude('babel', 'glob:src/**');
-  conf.addLoaderInclude('ts', 'glob:src/**');
+  conf.addLoaderInclude(['babel', 'ts'], 'glob:src/**');
 
   conf.loader('dsv', {
     test: /\.(csv)$/,
