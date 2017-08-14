@@ -448,10 +448,24 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     loader: 'xml-loader'
   });
 
-  conf.loader('file', {
-    test: /\.(jpe?g|gif|png|wav|mp3|ogv|ogg|mp4|webm)$/,
-    loader: 'file-loader'
-  });
+  // Various file loaders
+  const addFileLoader = (name: string, tests: string[]) => {
+    conf.loader(`file_${name}`, {
+      test: new RegExp(`\\.(${tests.join('|')})$`),
+      use: {
+        loader: 'file-loader',
+        options: {
+          name: '[name].[hash].[ext]',
+          outputPath: path.join('files', name)
+        }
+      }
+    });
+  };
+  addFileLoader('images', ['jpe?g', 'gif', 'png']);
+  addFileLoader('media', [
+    'wav', 'mp3', 'ogg',
+    'mp4', 'webm', 'ogv'
+  ]);
 
   if (options.useShaders) {
     resolveExtensions.push('.vert');
