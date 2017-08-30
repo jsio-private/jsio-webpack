@@ -249,8 +249,13 @@ All dependencies will be checked (specified in `package.json`).  The directory `
 
 #### `envWhitelist`
 
-Default: `[]`
-This is a list of strings, the strings are environment variables (`process.env.____`) to inject in to the build (using webpacks DefinePlugin).
+Default: `null`
+
+This is a list of strings, the strings are environment variables (`process.env.____`) to inject in to the build (using Webpack's [DefinePlugin](https://webpack.js.org/plugins/define-plugin/)).
+
+Specifying `null`, the default, will automatically add all environment variables defined in the given `env` file to whitelist.  There are other ways to define whitelist environment variables as well:
+
+Define whitelist in `package.json`:
 
 ```json
 {
@@ -262,7 +267,7 @@ This is a list of strings, the strings are environment variables (`process.env._
 }
 ```
 
-Or using a default value
+Define a default value:
 
 ```json
 "envWhitelist": {
@@ -270,7 +275,7 @@ Or using a default value
 }
 ```
 
-Or using NODE_ENV to choose a default value
+Use `NODE_ENV` to choose a default value:
 
 ```json
 "envWhitelist": {

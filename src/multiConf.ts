@@ -9,6 +9,15 @@ import commonGen from './multiConfGenerators/common';
 import { LoaderRule } from 'webpack';
 
 
+export type IEnvWhitelist = (
+  // List of whitelist keys
+  string[]
+  // Keys with defaults
+  |{ [key: string]: string; }
+  // No `process.env` baked in at runtime
+  |null
+);
+
 export type MultiConfOptions = {
   useStylus: boolean;
   useStylusExtractText: boolean;
@@ -36,7 +45,7 @@ export type MultiConfOptions = {
   };
   scanLibs: boolean;
   useModuleAliases: boolean;
-  envWhitelist: string[];
+  envWhitelist: IEnvWhitelist;
   flatProcessEnv: true,
   ifdefOpts: { [key: string]: any; },
   useTypescript: boolean;
@@ -102,7 +111,7 @@ export default class MultiConf {
       },
       scanLibs: false,
       useModuleAliases: false,
-      envWhitelist: [],
+      envWhitelist: null,
       flatProcessEnv: true,
       ifdefOpts: {},
       useJSX: false,

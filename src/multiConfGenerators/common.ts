@@ -1,6 +1,7 @@
+import { getLoadedEnv, ILoadedEnv } from '../envLoader';
 import { getLinkedModules } from '../utils';
 import { default as Configurator, WebpackConfig } from '../Configurator';
-import { ConfigFunction, MultiConfOptions } from '../multiConf';
+import { ConfigFunction, IEnvWhitelist, MultiConfOptions } from '../multiConf';
 import path from 'path';
 import querystring from 'querystring';
 
@@ -51,6 +52,21 @@ const resolveBabelPresets = function(preset: string): string {
 };
 
 
+const _addToEnvWhitelist = function(
+  moduleOpts: ModuleOpts,
+  key: string,
+  value?: string
+): void {
+  if (moduleOpts.envWhitelist[key]) {
+    console.warn(
+      'Overwriting existing envWhitelist entry: key=', key,
+      'value=', moduleOpts.envWhitelist[key]
+    );
+  }
+  moduleOpts.envWhitelist[key] = value;
+};
+
+
 const _handleModule = function(
   options: MultiConfOptions,
   modulePath: string,
@@ -74,15 +90,20 @@ const _handleModule = function(
       });
     }
 
-    const _envWhitelist = _.get(packageContents, 'jsioWebpack.envWhitelist');
+    const _envWhitelist: IEnvWhitelist = <IEnvWhitelist> _.get(
+      packageContents, 'jsioWebpack.envWhitelist'
+    );
     if (_envWhitelist) {
       log(`Adding envWhitelist from ${packageContents.name}: -> ${_envWhitelist}`);
-      _.forEach(_envWhitelist, (v, k) => {
-        if (moduleOpts.envWhitelist[k]) {
-          console.warn('Overwriting existing envWhitelist entry:', moduleOpts.envWhitelist[k]);
+      if (Array.isArray(_envWhitelist)) {
+        for (let i = 0; i < _envWhitelist.length; i++) {
+          _addToEnvWhitelist(moduleOpts, _envWhitelist[i]);
         }
-        moduleOpts.envWhitelist[k] = v;
-      });
+      } else {
+        _.forEach(_envWhitelist, (v, k) => {
+          _addToEnvWhitelist(moduleOpts, k, v);
+        });
+      }
     }
 
     // Handle nested module dependencies
@@ -142,7 +163,7 @@ type NpmListResult = {
 
 type ModuleOpts = {
   aliases: { [key: string]: string; };
-  envWhitelist: { [key: string]: string; };
+  envWhitelist: IEnvWhitelist;
 };
 
 
@@ -614,9 +635,16 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   // for proper error propagation
   let envWhitelist = {};
   return new Promise((resolve, reject) => {
+    log('options.envWhitelist=', options.envWhitelist);
     if (!options.envWhitelist) {
-      defines.NODE_ENV = defines.NODE_ENV || config.env;
-    } else if (!Array.isArray(options.envWhitelist) || options.envWhitelist.length > 0) {
+      defines.NODE_ENV = config.env;
+      const loadedEnv: ILoadedEnv = getLoadedEnv();
+      // White list all the loaded keys
+      addToWhitelist(envWhitelist, Object.keys(loadedEnv.variables));
+    } else if (
+      !Array.isArray(options.envWhitelist)
+      || options.envWhitelist.length > 0
+    ) {
       addToWhitelist(envWhitelist, options.envWhitelist);
     }
     // module aliases
