@@ -10,7 +10,7 @@ export interface ILoadedEnv {
 let loadedEnv: ILoadedEnv;
 
 
-const resetLoadedEnv = function() {
+export const resetLoadedEnv = function() {
   loadedEnv = {
     variables: {}
   };

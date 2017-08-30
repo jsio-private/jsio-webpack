@@ -26,4 +26,7 @@ export {
 
 // Functions
 export { startBuild as build } from './builder';
-export { loadEnv } from './envLoader';
+export {
+  loadEnv,
+  resetLoadedEnv
+} from './envLoader';
