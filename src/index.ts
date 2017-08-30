@@ -28,5 +28,6 @@ export {
 export { startBuild as build } from './builder';
 export {
   loadEnv,
-  resetLoadedEnv
+  resetLoadedEnv,
+  getLoadedEnv
 } from './envLoader';
