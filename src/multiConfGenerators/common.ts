@@ -639,8 +639,10 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
     if (!options.envWhitelist) {
       defines.NODE_ENV = config.env;
       const loadedEnv: ILoadedEnv = getLoadedEnv();
-      // White list all the loaded keys
-      addToWhitelist(envWhitelist, Object.keys(loadedEnv.variables));
+      if (loadedEnv) {
+        // White list all the loaded keys
+        addToWhitelist(envWhitelist, Object.keys(loadedEnv.variables));
+      }
     } else if (
       !Array.isArray(options.envWhitelist)
       || options.envWhitelist.length > 0
