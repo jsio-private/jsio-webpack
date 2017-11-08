@@ -51,7 +51,7 @@
     "glob-to-regexp": "^0.3.0",
     "glsl-template-loader": "git+https://github.com/jsio-private/glsl-template-loader#0c1b2cbaa6b1020de78527b37dcd2ce51a5e89bc",
     "html-webpack-plugin": "^2.22.0",
-    "ifdef-loader": "git+https://github.com/BlackstormLabs/ifdef-loader#master",
+    "ifdef-loader": "git+https://github.com/BlackstormLabs/ifdef-loader#372805d7dbb24af720b9be64a21bb07acf5e983d",
     "istanbul-instrumenter-loader": "^1.2.0",
     "json-loader": "^0.5.4",
     "json-schema-loader": "git+https://github.com/jsio-private/json-schema-loader",
