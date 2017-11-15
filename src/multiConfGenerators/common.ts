@@ -536,6 +536,8 @@ const buildConfig: ConfigFunction = function(conf: Configurator, options: MultiC
   ) {
     const gitRevisionPlugin = new GitRevisionPlugin();
     defines.COMMITHASH = gitRevisionPlugin.commithash();
+    defines.GIT_BRANCH = gitRevisionPlugin.branch();
+    defines.GIT_VERSION = gitRevisionPlugin.version();
   }
 
   conf.plugin('progressBar', ProgressBarPlugin, [{
